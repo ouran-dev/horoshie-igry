@@ -1,0 +1,17 @@
+<ContentControl x:Class="HoroshieIgry.Controls.Kenney.KenneyPanel"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:local="clr-namespace:HoroshieIgry.Controls.Kenney"
+                x:Name="Root">
+
+    <ContentControl.Template>
+        <ControlTemplate TargetType="{x:Type local:KenneyPanel}">
+            <Grid>
+                <Image x:Name="PanelImage" Stretch="Fill" IsHitTestVisible="False"/>
+                <ContentPresenter Margin="{TemplateBinding PanelPadding}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"/>
+            </Grid>
+        </ControlTemplate>
+    </ContentControl.Template>
+</ContentControl>

@@ -1,0 +1,116 @@
+<UserControl x:Class="HoroshieIgry.Views.MainMenuView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:games="clr-namespace:HoroshieIgry.Core.Games"
+             xmlns:kenney="clr-namespace:HoroshieIgry.Controls.Kenney"
+             xmlns:ui="clr-namespace:HoroshieIgry.Core.UI">
+
+    <Viewbox Stretch="Uniform"
+             StretchDirection="DownOnly"
+             HorizontalAlignment="Center"
+             VerticalAlignment="Center">
+        <StackPanel Width="1180">
+            <TextBlock Text="Выбери игру"
+                       Style="{StaticResource KenneySectionTitleText}"
+                       Margin="0,0,0,20"/>
+
+            <ItemsControl x:Name="GamesList">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="4"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type games:IGameModule}">
+                        <kenney:KenneyPanel Margin="10"
+                                            MinHeight="250"
+                                            AssetPath="{x:Static ui:KenneyPaths.PanelOutlineRectangle}"
+                                            PanelPadding="16,14">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <kenney:KenneyPanel Grid.Row="0"
+                                                    Grid.RowSpan="4"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Top"
+                                                    Margin="0,-4,-4,0"
+                                                    Width="72"
+                                                    Height="30"
+                                                    PanelPadding="6,4"
+                                                    Panel.ZIndex="1"
+                                                    AssetPath="{x:Static ui:KenneyPaths.PanelRectangle}">
+                                    <kenney:KenneyPanel.Style>
+                                        <Style TargetType="kenney:KenneyPanel">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsNew}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </kenney:KenneyPanel.Style>
+                                    <TextBlock Text="Новое"
+                                               Style="{StaticResource KenneyStatLabelText}"
+                                               FontSize="12"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </kenney:KenneyPanel>
+
+                                <kenney:KenneyPanel Grid.Row="0"
+                                                    Width="76"
+                                                    Height="76"
+                                                    HorizontalAlignment="Center"
+                                                    AssetPath="{x:Static ui:KenneyPaths.PanelSquare}"
+                                                    PanelPadding="6">
+                                    <TextBlock Text="{Binding IconEmoji}"
+                                               FontFamily="Segoe UI Emoji"
+                                               FontSize="42"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </kenney:KenneyPanel>
+
+                                <TextBlock Grid.Row="1"
+                                           Text="{Binding Title}"
+                                           Style="{StaticResource KenneyPanelTitleText}"
+                                           Margin="0,12,0,0"/>
+
+                                <TextBlock Grid.Row="2"
+                                           Text="{Binding Description}"
+                                           Style="{StaticResource KenneySubtitleText}"
+                                           FontSize="14"
+                                           LineHeight="19"
+                                           VerticalAlignment="Top"
+                                           Margin="0,8,0,12"/>
+
+                                <kenney:KenneyButton Grid.Row="3"
+                                                     HorizontalAlignment="Stretch"
+                                                     Height="50"
+                                                     Click="PlayButton_Click">
+                                    <kenney:KenneyButton.Style>
+                                        <Style TargetType="kenney:KenneyButton">
+                                            <Setter Property="Label" Value="Играть"/>
+                                            <Setter Property="AssetPath" Value="{x:Static ui:KenneyPaths.ButtonRectangleGreen}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsAvailable}" Value="False">
+                                                    <Setter Property="Label" Value="Скоро"/>
+                                                    <Setter Property="IsEnabled" Value="False"/>
+                                                    <Setter Property="AssetPath" Value="{x:Static ui:KenneyPaths.ButtonRectangleGrey}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </kenney:KenneyButton.Style>
+                                </kenney:KenneyButton>
+                            </Grid>
+                        </kenney:KenneyPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </Viewbox>
+</UserControl>

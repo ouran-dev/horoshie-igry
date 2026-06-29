@@ -1,0 +1,11 @@
+{
+  "id": "MusicalInstruments",
+  "title": "Музыка",
+  "items": [
+    { "id": "guitar", "label": "Гитара", "emoji": "🎸" },
+    { "id": "piano", "label": "Пианино", "emoji": "🎹" },
+    { "id": "drum", "label": "Барабан", "emoji": "🥁" },
+    { "id": "trumpet", "label": "Труба", "emoji": "🎺" },
+    { "id": "violin", "label": "Скрипка", "emoji": "🎻" }
+  ]
+}

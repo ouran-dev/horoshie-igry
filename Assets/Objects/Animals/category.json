@@ -1,0 +1,16 @@
+{
+  "id": "Animals",
+  "title": "Животные",
+  "items": [
+    { "id": "dog", "label": "Собака", "emoji": "🐶" },
+    { "id": "cat", "label": "Кот", "emoji": "🐱" },
+    { "id": "rabbit", "label": "Кролик", "emoji": "🐰" },
+    { "id": "bear", "label": "Медведь", "emoji": "🐻" },
+    { "id": "fox", "label": "Лиса", "emoji": "🦊" },
+    { "id": "frog", "label": "Лягушка", "emoji": "🐸" },
+    { "id": "penguin", "label": "Пингвин", "emoji": "🐧" },
+    { "id": "fish", "label": "Рыбка", "emoji": "🐠" },
+    { "id": "cow", "label": "Корова", "emoji": "🐄" },
+    { "id": "chicken", "label": "Курица", "emoji": "🐔" }
+  ]
+}

@@ -1,0 +1,96 @@
+<UserControl x:Class="HoroshieIgry.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:kenney="clr-namespace:HoroshieIgry.Controls.Kenney"
+             xmlns:dialogs="clr-namespace:HoroshieIgry.Controls"
+             xmlns:ui="clr-namespace:HoroshieIgry.Core.UI">
+
+    <Grid>
+        <Viewbox Stretch="Uniform"
+                 StretchDirection="DownOnly"
+                 HorizontalAlignment="Center"
+                 VerticalAlignment="Center">
+            <kenney:KenneyPanel Width="520"
+                                AssetPath="{x:Static ui:KenneyPaths.PanelOutlineRectangle}"
+                                PanelPadding="28,24">
+                <StackPanel>
+                    <kenney:KenneyImage Width="44"
+                                        Height="44"
+                                        HorizontalAlignment="Center"
+                                        Margin="0,0,0,12"
+                                        AssetPath="{x:Static ui:KenneyPaths.IconSettings}"/>
+                    <TextBlock Text="Настройки"
+                               Style="{StaticResource KenneyDialogTitleText}"/>
+                    <TextBlock Text="Скоро здесь можно будет настроить звук и размер букв."
+                               Style="{StaticResource KenneySubtitleText}"
+                               Margin="0,12,0,16"/>
+
+                    <kenney:KenneyPanel Margin="0,0,0,16"
+                                        AssetPath="{x:Static ui:KenneyPaths.PanelRectangle}"
+                                        PanelPadding="16,12">
+                        <StackPanel>
+                            <TextBlock Text="Версия"
+                                       Style="{StaticResource KenneyStatLabelText}"/>
+                            <TextBlock Text="{Binding VersionDisplay}"
+                                       Style="{StaticResource KenneyStatValueText}"
+                                       Margin="0,4,0,8"/>
+                            <TextBlock Text="{Binding UpdateStatus}"
+                                       Style="{StaticResource KenneyNoteText}"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </kenney:KenneyPanel>
+
+                    <kenney:KenneyButton Label="Проверить обновления"
+                                         Height="50"
+                                         Margin="0,0,0,10"
+                                         HorizontalAlignment="Stretch"
+                                         AssetPath="{x:Static ui:KenneyPaths.ButtonRectangleGreen}"
+                                         Click="CheckUpdatesButton_Click">
+                        <kenney:KenneyButton.Style>
+                            <Style TargetType="kenney:KenneyButton">
+                                <Setter Property="IsEnabled" Value="True"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding CanCheckForUpdates}" Value="False">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                        <Setter Property="AssetPath" Value="{x:Static ui:KenneyPaths.ButtonRectangleGrey}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsCheckingUpdates}" Value="True">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                        <Setter Property="AssetPath" Value="{x:Static ui:KenneyPaths.ButtonRectangleGrey}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </kenney:KenneyButton.Style>
+                    </kenney:KenneyButton>
+
+                    <kenney:KenneyButton Label="Перезапустить с обновлением"
+                                         Height="50"
+                                         Margin="0,0,0,20"
+                                         HorizontalAlignment="Stretch"
+                                         AssetPath="{x:Static ui:KenneyPaths.ButtonRectangleBlue}"
+                                         Click="RestartForUpdateButton_Click">
+                        <kenney:KenneyButton.Style>
+                            <Style TargetType="kenney:KenneyButton">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding CanRestartForUpdate}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </kenney:KenneyButton.Style>
+                    </kenney:KenneyButton>
+
+                    <kenney:KenneyButton Label="В каталог"
+                                         Height="50"
+                                         Width="220"
+                                         HorizontalAlignment="Center"
+                                         AssetPath="{x:Static ui:KenneyPaths.ButtonRectangleBlue}"
+                                         Click="BackButton_Click"/>
+                </StackPanel>
+            </kenney:KenneyPanel>
+        </Viewbox>
+
+        <dialogs:KenneyDialogOverlay x:Name="UpdateDialog"/>
+    </Grid>
+</UserControl>

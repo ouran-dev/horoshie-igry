@@ -1,0 +1,12 @@
+{
+  "id": "Clothes",
+  "title": "Одежда",
+  "items": [
+    { "id": "shirt", "label": "Футболка", "emoji": "👕" },
+    { "id": "pants", "label": "Штаны", "emoji": "👖" },
+    { "id": "hat", "label": "Кепка", "emoji": "🧢" },
+    { "id": "socks", "label": "Носки", "emoji": "🧦" },
+    { "id": "jacket", "label": "Куртка", "emoji": "🧥" },
+    { "id": "shoes", "label": "Кроссовки", "emoji": "👟" }
+  ]
+}

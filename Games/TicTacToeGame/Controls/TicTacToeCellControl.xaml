@@ -1,0 +1,50 @@
+<UserControl x:Class="HoroshieIgry.Games.TicTacToeGame.Controls.TicTacToeCellControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:kenney="clr-namespace:HoroshieIgry.Controls.Kenney"
+             xmlns:ui="clr-namespace:HoroshieIgry.Core.UI"
+             Background="Transparent"
+             IsHitTestVisible="True">
+
+    <Grid x:Name="RootGrid"
+          Background="Transparent"
+          RenderTransformOrigin="0.5,0.5">
+        <Grid.RenderTransform>
+            <ScaleTransform x:Name="PressScale" ScaleX="1" ScaleY="1"/>
+        </Grid.RenderTransform>
+
+        <kenney:KenneyPanel AssetPath="{x:Static ui:KenneyPaths.PanelSquare}"
+                            PanelPadding="10"
+                            IsHitTestVisible="False">
+            <Grid>
+                <Border CornerRadius="8" IsHitTestVisible="False">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsWinning}" Value="True">
+                                    <Setter Property="Background" Value="#5534C759"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                </Border>
+
+                <kenney:KenneyImage Stretch="Uniform"
+                                    AssetPath="{Binding SymbolAssetPath}"
+                                    IsHitTestVisible="False">
+                    <kenney:KenneyImage.Style>
+                        <Style TargetType="kenney:KenneyImage">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasSymbol}" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </kenney:KenneyImage.Style>
+                </kenney:KenneyImage>
+            </Grid>
+        </kenney:KenneyPanel>
+    </Grid>
+</UserControl>

@@ -1,0 +1,25 @@
+<UserControl x:Class="HoroshieIgry.Controls.OrganizationLogo"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             IsHitTestVisible="False">
+
+    <Border Background="#F2F6FB"
+            BorderBrush="#C8D6EA"
+            BorderThickness="1"
+            CornerRadius="10"
+            Padding="10,6"
+            Opacity="0.92">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="6"
+                              ShadowDepth="1"
+                              Direction="270"
+                              Opacity="0.12"
+                              Color="#2B5C9A"/>
+        </Border.Effect>
+
+        <Image x:Name="LogoImage"
+               MaxHeight="26"
+               Stretch="Uniform"
+               RenderOptions.BitmapScalingMode="HighQuality"/>
+    </Border>
+</UserControl>

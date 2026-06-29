@@ -1,0 +1,11 @@
+{
+  "id": "Sports",
+  "title": "Спорт",
+  "items": [
+    { "id": "ball", "label": "Мяч", "emoji": "⚽" },
+    { "id": "basketball", "label": "Баскетбол", "emoji": "🏀" },
+    { "id": "tennis", "label": "Теннис", "emoji": "🎾" },
+    { "id": "skates", "label": "Коньки", "emoji": "⛸️" },
+    { "id": "ski", "label": "Лыжи", "emoji": "🎿" }
+  ]
+}

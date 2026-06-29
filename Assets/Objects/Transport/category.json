@@ -1,0 +1,13 @@
+{
+  "id": "Transport",
+  "title": "Транспорт",
+  "items": [
+    { "id": "car", "label": "Машина", "emoji": "🚗" },
+    { "id": "bus", "label": "Автобус", "emoji": "🚌" },
+    { "id": "train", "label": "Поезд", "emoji": "🚆" },
+    { "id": "boat", "label": "Лодка", "emoji": "⛵" },
+    { "id": "plane", "label": "Самолёт", "emoji": "✈️" },
+    { "id": "helicopter", "label": "Вертолёт", "emoji": "🚁" },
+    { "id": "bicycle", "label": "Велосипед", "emoji": "🚲" }
+  ]
+}

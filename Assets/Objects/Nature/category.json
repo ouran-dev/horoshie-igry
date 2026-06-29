@@ -1,0 +1,12 @@
+{
+  "id": "Nature",
+  "title": "Природа",
+  "items": [
+    { "id": "tree", "label": "Дерево", "emoji": "🌳" },
+    { "id": "flower", "label": "Цветок", "emoji": "🌸" },
+    { "id": "sun", "label": "Солнце", "emoji": "☀️" },
+    { "id": "cloud", "label": "Облако", "emoji": "☁️" },
+    { "id": "rock", "label": "Камень", "emoji": "🪨" },
+    { "id": "leaf", "label": "Лист", "emoji": "🍃" }
+  ]
+}

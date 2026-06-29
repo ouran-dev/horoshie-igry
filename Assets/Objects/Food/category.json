@@ -1,0 +1,14 @@
+{
+  "id": "Food",
+  "title": "Еда",
+  "items": [
+    { "id": "bread", "label": "Хлеб", "emoji": "🍞" },
+    { "id": "cheese", "label": "Сыр", "emoji": "🧀" },
+    { "id": "carrot", "label": "Морковь", "emoji": "🥕" },
+    { "id": "potato", "label": "Картошка", "emoji": "🥔" },
+    { "id": "tomato", "label": "Помидор", "emoji": "🍅" },
+    { "id": "onion", "label": "Лук", "emoji": "🧅" },
+    { "id": "corn", "label": "Кукуруза", "emoji": "🌽" },
+    { "id": "pizza", "label": "Пицца", "emoji": "🍕" }
+  ]
+}

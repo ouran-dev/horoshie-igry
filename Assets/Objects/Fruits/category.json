@@ -1,0 +1,14 @@
+{
+  "id": "Fruits",
+  "title": "Фрукты",
+  "items": [
+    { "id": "apple", "label": "Яблоко", "emoji": "🍎" },
+    { "id": "banana", "label": "Банан", "emoji": "🍌" },
+    { "id": "strawberry", "label": "Клубника", "emoji": "🍓" },
+    { "id": "grape", "label": "Виноград", "emoji": "🍇" },
+    { "id": "pear", "label": "Груша", "emoji": "🍐" },
+    { "id": "orange", "label": "Апельсин", "emoji": "🍊" },
+    { "id": "cherry", "label": "Вишня", "emoji": "🍒" },
+    { "id": "lemon", "label": "Лимон", "emoji": "🍋" }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "School",
+  "title": "Школа",
+  "items": [
+    { "id": "pencil", "label": "Карандаш", "emoji": "✏️" },
+    { "id": "notebook", "label": "Тетрадь", "emoji": "📒" },
+    { "id": "book", "label": "Учебник", "emoji": "📖" },
+    { "id": "ruler", "label": "Линейка", "emoji": "📏" },
+    { "id": "backpack", "label": "Рюкзак", "emoji": "🎒" },
+    { "id": "scissors", "label": "Ножницы", "emoji": "✂️" }
+  ]
+}
