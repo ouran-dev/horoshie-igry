@@ -10,7 +10,8 @@
              LostTouchCapture="Root_LostTouchCapture"
              PreviewMouseLeftButtonDown="Root_PreviewMouseLeftButtonDown"
              PreviewMouseMove="Root_PreviewMouseMove"
-             PreviewMouseLeftButtonUp="Root_PreviewMouseLeftButtonUp">
+             PreviewMouseLeftButtonUp="Root_PreviewMouseLeftButtonUp"
+             LostMouseCapture="Root_LostMouseCapture">
 
     <Canvas x:Name="BoardCanvas"
             Background="Transparent"

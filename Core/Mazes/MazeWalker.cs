@@ -10,7 +10,7 @@ public static class MazeWalker
         double characterCol,
         double touchRow,
         double touchCol,
-        double maxDistanceCells = 1.35)
+        double maxDistanceCells = 1.85)
         => IsNearCharacter(characterRow, characterCol, touchRow, touchCol, maxDistanceCells);
 
     public static MazeCell FindNearestWalkable(MazeDefinition maze, double row, double col)
@@ -60,21 +60,48 @@ public static class MazeWalker
         if (path.Count < 2)
             return ClampMove(maze, fromRow, fromCol, fingerRow, fingerCol);
 
-        var waypoint = path[1];
-        var targetRow = waypoint.Row + 0.5;
-        var targetCol = waypoint.Col + 0.5;
+        var (targetRow, targetCol) = AdvanceAlongPath(
+            fromRow, fromCol, path, stepSize);
 
-        var deltaRow = targetRow - fromRow;
-        var deltaCol = targetCol - fromCol;
-        var distance = Math.Sqrt(deltaRow * deltaRow + deltaCol * deltaCol);
-        if (distance < 0.001)
-            return (fromRow, fromCol);
+        return ClampMove(maze, fromRow, fromCol, targetRow, targetCol);
+    }
 
-        var move = Math.Min(stepSize, distance);
-        var nextRow = fromRow + deltaRow / distance * move;
-        var nextCol = fromCol + deltaCol / distance * move;
+    private static (double Row, double Col) AdvanceAlongPath(
+        double fromRow,
+        double fromCol,
+        IReadOnlyList<MazeCell> path,
+        double stepSize)
+    {
+        var row = fromRow;
+        var col = fromCol;
+        var remaining = stepSize;
 
-        return ClampMove(maze, fromRow, fromCol, nextRow, nextCol);
+        for (var i = 1; i < path.Count && remaining > 0.001; i++)
+        {
+            var waypointRow = path[i].Row + 0.5;
+            var waypointCol = path[i].Col + 0.5;
+
+            var deltaRow = waypointRow - row;
+            var deltaCol = waypointCol - col;
+            var distance = Math.Sqrt(deltaRow * deltaRow + deltaCol * deltaCol);
+
+            if (distance < 0.001)
+                continue;
+
+            if (distance <= remaining)
+            {
+                row = waypointRow;
+                col = waypointCol;
+                remaining -= distance;
+                continue;
+            }
+
+            row += deltaRow / distance * remaining;
+            col += deltaCol / distance * remaining;
+            break;
+        }
+
+        return (row, col);
     }
 
     public static IReadOnlyList<MazeCell> FindPath(MazeDefinition maze, MazeCell start, MazeCell goal)
