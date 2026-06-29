@@ -56,12 +56,16 @@ public static class MazeWalker
         if (fromCell == fingerCell)
             return (fingerCell.Row + 0.5, fingerCell.Col + 0.5);
 
+        var distToFinger = Math.Sqrt(
+            Math.Pow(fingerRow - fromRow, 2) + Math.Pow(fingerCol - fromCol, 2));
+        var adaptiveStep = Math.Clamp(Math.Max(stepSize, distToFinger * 0.45), stepSize, stepSize * 2.8);
+
         var path = FindPath(maze, fromCell, fingerCell);
         if (path.Count < 2)
             return ClampMove(maze, fromRow, fromCol, fingerRow, fingerCol);
 
         var (targetRow, targetCol) = AdvanceAlongPath(
-            fromRow, fromCol, path, stepSize);
+            fromRow, fromCol, path, adaptiveStep);
 
         return ClampMove(maze, fromRow, fromCol, targetRow, targetCol);
     }

@@ -73,8 +73,6 @@ public partial class MazeGameView : UserControl, INotifyPropertyChanged
         Unloaded += (_, _) => StopTimer();
     }
 
-    private void MazeGameView_SizeChanged(object sender, SizeChangedEventArgs e) { }
-
     private void OnFirstLoaded(object sender, RoutedEventArgs e)
     {
         Loaded -= OnFirstLoaded;
