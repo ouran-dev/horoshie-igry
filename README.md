@@ -35,6 +35,8 @@ dotnet run
 | Параметр | Значение |
 |----------|----------|
 | GitHub | https://github.com/ouran-dev/horoshie-igry |
+| **Инструкция (скачать)** | https://github.com/ouran-dev/horoshie-igry/releases/latest/download/ИНСТРУКЦИЯ-ПО-ШАГАМ.txt |
+| **Последний релиз** | https://github.com/ouran-dev/horoshie-igry/releases/latest |
 | Pack ID (Velopack) | `HoroshieIgry` |
 | Настройки в коде | `Core/Updates/UpdateSettings.cs` |
 

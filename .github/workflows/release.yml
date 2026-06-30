@@ -64,6 +64,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path $offlineDir | Out-Null
           Copy-Item -Path publish-offline/* -Destination $offlineDir -Recurse -Force
           Copy-Item Installer/Install-Offline.ps1, Installer/Установить-офлайн.bat -Destination $offlineDir
+          Copy-Item "ИНСТРУКЦИЯ-ПО-ШАГАМ.txt" -Destination $offlineDir
           Compress-Archive -Path "$offlineDir/*" -DestinationPath "Releases/HoroshieIgry-Offline-$version-win-x64.zip" -Force
 
       - name: Upload to GitHub Releases
@@ -83,4 +84,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          files: Releases/HoroshieIgry-Offline-${{ steps.version.outputs.version }}-win-x64.zip
+          files: |
+            Releases/HoroshieIgry-Offline-${{ steps.version.outputs.version }}-win-x64.zip
+            ИНСТРУКЦИЯ-ПО-ШАГАМ.txt

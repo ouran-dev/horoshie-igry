@@ -66,6 +66,7 @@ mkdir "%OFFLINE_DIR%"
 xcopy /E /I /Y "publish-offline\*" "%OFFLINE_DIR%\" >nul
 copy /Y "Installer\Install-Offline.ps1" "%OFFLINE_DIR%\" >nul
 copy /Y "Installer\Установить-офлайн.bat" "%OFFLINE_DIR%\" >nul
+copy /Y "ИНСТРУКЦИЯ-ПО-ШАГАМ.txt" "%OFFLINE_DIR%\" >nul
 
 powershell -NoProfile -Command "Compress-Archive -Path '%OFFLINE_DIR%\*' -DestinationPath 'Releases\HoroshieIgry-Offline-%VERSION%-win-x64.zip' -Force"
 if errorlevel 1 goto :failed
@@ -83,6 +84,11 @@ if "%GITHUB_TOKEN%"=="" (
 
 vpk upload github -o Releases --repoUrl https://github.com/ouran-dev/horoshie-igry --token %GITHUB_TOKEN% --publish --tag v%VERSION% --releaseName "Хорошие игры %VERSION%"
 if errorlevel 1 goto :failed
+
+where gh >nul 2>&1
+if not errorlevel 1 (
+  gh release upload v%VERSION% "ИНСТРУКЦИЯ-ПО-ШАГАМ.txt" "Releases\HoroshieIgry-Offline-%VERSION%-win-x64.zip" --repo ouran-dev/horoshie-igry --clobber 2>nul
+)
 
 echo.
 echo  Релиз v%VERSION% опубликован на GitHub.
