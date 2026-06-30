@@ -1,0 +1,53 @@
+<UserControl x:Class="HoroshieIgry.Games.BalloonPopGame.Controls.BalloonControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="Transparent"
+             Cursor="Hand">
+
+    <Grid x:Name="Root"
+          RenderTransformOrigin="0.5,0.5"
+          CacheMode="BitmapCache">
+        <Grid.RenderTransform>
+            <TransformGroup>
+                <TranslateTransform x:Name="BobTransform"/>
+                <ScaleTransform x:Name="ScaleTransform" ScaleX="1" ScaleY="1"/>
+            </TransformGroup>
+        </Grid.RenderTransform>
+
+        <Grid x:Name="BalloonBody">
+            <Ellipse x:Name="BubbleDome"
+                     StrokeThickness="1.5">
+                <Ellipse.Fill>
+                    <RadialGradientBrush GradientOrigin="0.34,0.30"
+                                         Center="0.34,0.30"
+                                         RadiusX="0.92"
+                                         RadiusY="0.92">
+                        <GradientStop Color="#F5FFFFFF" Offset="0"/>
+                        <GradientStop x:Name="LightColorStop" Color="#E8F5E9" Offset="0.22"/>
+                        <GradientStop x:Name="MainColorStop" Color="#66BB6A" Offset="0.58"/>
+                        <GradientStop x:Name="DarkColorStop" Color="#43A047" Offset="1"/>
+                    </RadialGradientBrush>
+                </Ellipse.Fill>
+                <Ellipse.Stroke>
+                    <SolidColorBrush x:Name="StrokeBrush" Color="#558B2F" Opacity="0.5"/>
+                </Ellipse.Stroke>
+            </Ellipse>
+
+            <Ellipse x:Name="BubbleHighlight"
+                     IsHitTestVisible="False"
+                     HorizontalAlignment="Left"
+                     VerticalAlignment="Top">
+                <Ellipse.Fill>
+                    <RadialGradientBrush GradientOrigin="0.35,0.35" Center="0.35,0.35" RadiusX="0.9" RadiusY="0.9">
+                        <GradientStop Color="#BFFFFFFF" Offset="0"/>
+                        <GradientStop Color="#00FFFFFF" Offset="1"/>
+                    </RadialGradientBrush>
+                </Ellipse.Fill>
+            </Ellipse>
+        </Grid>
+
+        <Canvas x:Name="PopCanvas"
+                Visibility="Collapsed"
+                IsHitTestVisible="False"/>
+    </Grid>
+</UserControl>

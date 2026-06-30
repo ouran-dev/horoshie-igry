@@ -23,11 +23,13 @@ public partial class TicTacToeGameView : UserControl, INotifyPropertyChanged
     private readonly Random _random = new();
     private CancellationTokenSource? _roundCts;
 
+    private TicTacToeGameMode? _mode;
+    private bool _isModeSelectVisible = true;
     private int _level = 1;
-    private int _playerWins;
-    private int _aiWins;
+    private int _xWins;
+    private int _oWins;
     private int _draws;
-    private bool _isPlayerTurn = true;
+    private TicTacToeMark _currentMark = TicTacToeAssets.PlayerMark;
     private bool _isInputLocked;
     private bool _isRoundActive;
     private double _cellSize = 140;
@@ -56,11 +58,24 @@ public partial class TicTacToeGameView : UserControl, INotifyPropertyChanged
 
     public int Level => _level;
     public string LevelBadgeDisplay => _level.ToString();
-    public string LevelTitle => $"Поле 3×3 · сила {_level}";
-    public string ScoreDisplay => $"Ты {_playerWins} : {_aiWins} компьютер · ничьи {_draws}";
+    public string LevelTitle => _mode == TicTacToeGameMode.LocalTwoPlayer
+        ? "Два игрока на одном экране"
+        : $"Поле 3×3 · сила {_level}";
+    public string ScoreDisplay => _mode == TicTacToeGameMode.LocalTwoPlayer
+        ? $"Крестик {_xWins} : {_oWins} нолик · ничьи {_draws}"
+        : $"Ты {_xWins} : {_oWins} компьютер · ничьи {_draws}";
+    public string OpponentDisplay => _mode switch
+    {
+        TicTacToeGameMode.LocalTwoPlayer => "1 на 1",
+        TicTacToeGameMode.VsComputer => "Компьютер",
+        _ => "—"
+    };
     public string HintText => _hintText;
-    public string HintSymbolPath => TicTacToeAssets.GetSymbolPath(
-        _isPlayerTurn ? TicTacToeAssets.PlayerMark : TicTacToeAssets.AiMark);
+    public string HintSymbolPath => TicTacToeAssets.GetSymbolPath(_currentMark);
+    public Visibility ModeSelectVisibility => _isModeSelectVisible ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility LevelBadgeVisibility => _mode == TicTacToeGameMode.VsComputer && !_isModeSelectVisible
+        ? Visibility.Visible
+        : Visibility.Collapsed;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -71,7 +86,7 @@ public partial class TicTacToeGameView : UserControl, INotifyPropertyChanged
         DataContext = this;
         Stylus.SetIsPressAndHoldEnabled(this, false);
         Stylus.SetIsFlicksEnabled(this, false);
-        Loaded += (_, _) => StartNewRound(resetLevel: true);
+        Loaded += (_, _) => ShowModeSelect();
         Unloaded += (_, _) => CancelRound();
         SizeChanged += TicTacToeGameView_SizeChanged;
     }
@@ -114,28 +129,61 @@ public partial class TicTacToeGameView : UserControl, INotifyPropertyChanged
         _roundCts = null;
     }
 
+    private void ShowModeSelect()
+    {
+        CancelRound();
+        _isModeSelectVisible = true;
+        _mode = null;
+        _hintText = "Выберите режим игры.";
+        UpdateDisplays();
+        ApplyRoundBackground();
+    }
+
+    private void StartMode(TicTacToeGameMode mode)
+    {
+        _mode = mode;
+        _isModeSelectVisible = false;
+        StartNewRound(resetLevel: true);
+    }
+
+    private void VsComputerButton_Click(object sender, RoutedEventArgs e)
+        => StartMode(TicTacToeGameMode.VsComputer);
+
+    private void TwoPlayerButton_Click(object sender, RoutedEventArgs e)
+        => StartMode(TicTacToeGameMode.LocalTwoPlayer);
+
     private void StartNewRound(bool resetLevel)
     {
+        if (_mode is null) return;
+
         CancelRound();
         _roundCts = new CancellationTokenSource();
 
         if (resetLevel)
         {
             _level = 1;
-            _playerWins = 0;
-            _aiWins = 0;
+            _xWins = 0;
+            _oWins = 0;
             _draws = 0;
         }
 
         ResetBoard();
-        _isPlayerTurn = true;
+        _currentMark = TicTacToeAssets.PlayerMark;
         _isRoundActive = true;
         _isInputLocked = false;
-        _hintText = "Твой ход — крестик.";
+        _hintText = GetTurnHint(_currentMark);
         UpdateDisplays();
         ApplyRoundBackground();
         UpdateScaledLayout();
     }
+
+    private string GetTurnHint(TicTacToeMark mark) => _mode switch
+    {
+        TicTacToeGameMode.LocalTwoPlayer when mark == TicTacToeMark.X => "Ход игрока 1 — крестик.",
+        TicTacToeGameMode.LocalTwoPlayer => "Ход игрока 2 — нолик.",
+        _ when mark == TicTacToeMark.X => "Твой ход — крестик.",
+        _ => "Ход компьютера…"
+    };
 
     private void ResetBoard()
     {
@@ -153,12 +201,20 @@ public partial class TicTacToeGameView : UserControl, INotifyPropertyChanged
         OnPropertyChanged(nameof(LevelBadgeDisplay));
         OnPropertyChanged(nameof(LevelTitle));
         OnPropertyChanged(nameof(ScoreDisplay));
+        OnPropertyChanged(nameof(OpponentDisplay));
         OnPropertyChanged(nameof(HintText));
         OnPropertyChanged(nameof(HintSymbolPath));
+        OnPropertyChanged(nameof(ModeSelectVisibility));
+        OnPropertyChanged(nameof(LevelBadgeVisibility));
     }
 
     private void NewGameButton_Click(object sender, RoutedEventArgs e)
-        => StartNewRound(resetLevel: true);
+    {
+        if (_mode is null)
+            ShowModeSelect();
+        else
+            StartNewRound(resetLevel: true);
+    }
 
     private void BackToCatalogButton_Click(object sender, RoutedEventArgs e)
         => _navigation.NavigateToCatalog();
@@ -178,7 +234,8 @@ public partial class TicTacToeGameView : UserControl, INotifyPropertyChanged
 
     private bool TryHandleCellInput(Point positionOnBoard, int deviceId)
     {
-        if (!_isRoundActive || _isInputLocked || !_isPlayerTurn) return false;
+        if (_isModeSelectVisible || !_isRoundActive || _isInputLocked) return false;
+        if (_mode == TicTacToeGameMode.VsComputer && _currentMark != TicTacToeAssets.PlayerMark) return false;
 
         var tick = Environment.TickCount64;
         if (deviceId == _lastInputDeviceId && tick - _lastInputTick < InputDebounceMs)
@@ -193,7 +250,7 @@ public partial class TicTacToeGameView : UserControl, INotifyPropertyChanged
         _lastInputDeviceId = deviceId;
         _lastInputTick = tick;
         PlayPressFeedback(cellIndex.Value);
-        _ = ProcessPlayerMoveAsync(cellIndex.Value);
+        _ = ProcessMoveAsync(cellIndex.Value);
         return true;
     }
 
@@ -228,19 +285,28 @@ public partial class TicTacToeGameView : UserControl, INotifyPropertyChanged
         }
     }
 
-    private async Task ProcessPlayerMoveAsync(int cellIndex)
+    private async Task ProcessMoveAsync(int cellIndex)
     {
         _isInputLocked = true;
         var ct = _roundCts?.Token ?? CancellationToken.None;
 
         try
         {
-            ApplyMark(cellIndex, TicTacToeAssets.PlayerMark);
+            ApplyMark(cellIndex, _currentMark);
 
-            if (await TryFinishRoundAsync(TicTacToeAssets.PlayerMark)) return;
+            if (await TryFinishRoundAsync(_currentMark)) return;
 
-            _isPlayerTurn = false;
-            _hintText = "Ход компьютера…";
+            if (_mode == TicTacToeGameMode.LocalTwoPlayer)
+            {
+                _currentMark = OppositeMark(_currentMark);
+                _hintText = GetTurnHint(_currentMark);
+                UpdateDisplays();
+                _isInputLocked = false;
+                return;
+            }
+
+            _currentMark = TicTacToeAssets.AiMark;
+            _hintText = GetTurnHint(_currentMark);
             UpdateDisplays();
 
             await Task.Delay(AiMoveDelayMs, ct);
@@ -253,8 +319,8 @@ public partial class TicTacToeGameView : UserControl, INotifyPropertyChanged
 
             if (await TryFinishRoundAsync(TicTacToeAssets.AiMark)) return;
 
-            _isPlayerTurn = true;
-            _hintText = "Твой ход — крестик.";
+            _currentMark = TicTacToeAssets.PlayerMark;
+            _hintText = GetTurnHint(_currentMark);
             UpdateDisplays();
             _isInputLocked = false;
         }
@@ -264,8 +330,14 @@ public partial class TicTacToeGameView : UserControl, INotifyPropertyChanged
         }
     }
 
+    private static TicTacToeMark OppositeMark(TicTacToeMark mark)
+        => mark == TicTacToeMark.X ? TicTacToeMark.O : TicTacToeMark.X;
+
     private void ApplyMark(int index, TicTacToeMark mark)
-        => Cells[index].Mark = mark;
+    {
+        Cells[index].Mark = mark;
+        TicTacToeSounds.PlayPlace(mark == TicTacToeMark.X);
+    }
 
     private async Task<bool> TryFinishRoundAsync(TicTacToeMark lastMark)
     {
@@ -277,29 +349,48 @@ public partial class TicTacToeGameView : UserControl, INotifyPropertyChanged
             HighlightWinningLine(line);
             SetCellsClickable(false);
 
-            if (winner == TicTacToeAssets.PlayerMark)
+            if (winner == TicTacToeMark.X)
+                _xWins++;
+            else
+                _oWins++;
+
+            UpdateDisplays();
+
+            if (_mode == TicTacToeGameMode.VsComputer)
             {
-                _playerWins++;
-                _level++;
-                UpdateDisplays();
-                await PraiseOverlay.PlayAsync();
-                await ShowResultDialogAsync(
-                    "Ты выиграл!",
-                    $"Отличная партия!\nСчёт: {_playerWins} : {_aiWins}",
-                    "Ещё раз",
-                    "Выйти",
-                    startNextOnYes: true);
+                if (winner == TicTacToeAssets.PlayerMark)
+                {
+                    TicTacToeSounds.PlayVictory();
+                    _level++;
+                    UpdateDisplays();
+                    await PraiseOverlay.PlayAsync();
+                    await ShowResultDialogAsync(
+                        "Ты выиграл!",
+                        $"Отличная партия!\nСчёт: {_xWins} : {_oWins}",
+                        "Ещё раз",
+                        "Выйти",
+                        startNextOnYes: true);
+                }
+                else
+                {
+                    TicTacToeSounds.PlayDefeat();
+                    await ShowResultDialogAsync(
+                        "Компьютер выиграл",
+                        "В следующий раз получится!\nПопробуй ещё раз.",
+                        "Ещё раз",
+                        "Выйти",
+                        startNextOnYes: true);
+                }
             }
             else
             {
-                _aiWins++;
-                UpdateDisplays();
-                await ShowResultDialogAsync(
-                    "Компьютер выиграл",
-                    "В следующий раз получится!\nПопробуй ещё раз.",
-                    "Ещё раз",
-                    "Выйти",
-                    startNextOnYes: true);
+                TicTacToeSounds.PlayVictory();
+                var title = winner == TicTacToeMark.X ? "Игрок 1 выиграл!" : "Игрок 2 выиграл!";
+                var message = winner == TicTacToeMark.X
+                    ? "Крестик победил!\nСыграем ещё?"
+                    : "Нолик победил!\nСыграем ещё?";
+
+                await ShowResultDialogAsync(title, message, "Ещё раз", "Выйти", startNextOnYes: true);
             }
 
             return true;
@@ -313,6 +404,7 @@ public partial class TicTacToeGameView : UserControl, INotifyPropertyChanged
         SetCellsClickable(false);
         UpdateDisplays();
 
+        TicTacToeSounds.PlayDrawGame();
         await ShowResultDialogAsync(
             "Ничья!",
             "Поле заполнено — это ничья.\nСыграем ещё?",

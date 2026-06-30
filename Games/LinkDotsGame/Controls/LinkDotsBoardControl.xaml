@@ -1,0 +1,19 @@
+<UserControl x:Class="HoroshieIgry.Games.LinkDotsGame.Controls.LinkDotsBoardControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root"
+             Background="Transparent"
+             PreviewTouchDown="Root_PreviewTouchDown"
+             PreviewTouchMove="Root_PreviewTouchMove"
+             PreviewTouchUp="Root_PreviewTouchUp"
+             LostTouchCapture="Root_LostTouchCapture"
+             PreviewMouseLeftButtonDown="Root_PreviewMouseLeftButtonDown"
+             PreviewMouseMove="Root_PreviewMouseMove"
+             PreviewMouseLeftButtonUp="Root_PreviewMouseLeftButtonUp"
+             LostMouseCapture="Root_LostMouseCapture">
+
+    <Canvas x:Name="BoardCanvas"
+            Background="Transparent"
+            ClipToBounds="True"/>
+
+</UserControl>

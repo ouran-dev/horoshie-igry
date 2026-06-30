@@ -35,7 +35,7 @@ public sealed class AppUpdateService
 
     public void Initialize()
     {
-        if (!UpdateSettings.IsConfigured)
+        if (!UpdateSettings.SupportsAutoUpdate || !UpdateSettings.IsConfigured)
         {
             CanCheckForUpdates = false;
             return;
@@ -52,7 +52,7 @@ public sealed class AppUpdateService
         IProgress<int>? progress = null,
         CancellationToken cancellationToken = default)
     {
-        if (!UpdateSettings.IsConfigured)
+        if (!UpdateSettings.SupportsAutoUpdate || !UpdateSettings.IsConfigured)
         {
             return new UpdateCheckResult
             {

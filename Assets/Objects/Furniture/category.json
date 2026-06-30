@@ -4,7 +4,7 @@
   "items": [
     { "id": "chair", "label": "Стул", "emoji": "🪑" },
     { "id": "bed", "label": "Кровать", "emoji": "🛏️" },
-    { "id": "lamp", "label": "Лампа", "emoji": "💡" },
+    { "id": "lamp", "label": "Лампа", "emoji": "🪔" },
     { "id": "sofa", "label": "Диван", "emoji": "🛋️" }
   ]
 }

@@ -25,6 +25,7 @@
                             Height="64"
                             PanelPadding="8,6"
                             Panel.ZIndex="2"
+                            Visibility="{Binding LevelBadgeVisibility}"
                             AssetPath="{x:Static ui:KenneyPaths.PanelOutlineRectangle}">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                 <TextBlock Text="Уровень"
@@ -83,9 +84,10 @@
                         <TextBlock Text="Соперник"
                                    Style="{StaticResource KenneyStatLabelText}"
                                    HorizontalAlignment="Center"/>
-                        <TextBlock Text="Компьютер"
+                        <TextBlock Text="{Binding OpponentDisplay}"
                                    Style="{StaticResource KenneyStatValueText}"
                                    FontSize="18"
+                                   TextAlignment="Center"
                                    HorizontalAlignment="Center"/>
                     </StackPanel>
                 </kenney:KenneyPanel>
@@ -174,5 +176,50 @@
 
         <praise:PraiseBurstOverlay x:Name="PraiseOverlay" Grid.RowSpan="4" Panel.ZIndex="3"/>
         <dialogs:KenneyDialogOverlay x:Name="GameDialog" Grid.RowSpan="4"/>
+
+        <Grid Grid.RowSpan="4"
+              Panel.ZIndex="6"
+              Visibility="{Binding ModeSelectVisibility}"
+              Background="#66000000">
+            <Viewbox Stretch="Uniform"
+                     StretchDirection="DownOnly"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center">
+                <kenney:KenneyPanel Width="460"
+                                    Height="300"
+                                    PanelPadding="28,24"
+                                    AssetPath="{x:Static ui:KenneyPaths.PanelOutlineRectangle}">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Крестики-нолики"
+                                   Style="{StaticResource KenneyPanelTitleText}"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,0,0,6"/>
+                        <TextBlock Text="Выберите режим игры"
+                                   Style="{StaticResource KenneyHintText}"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,0,0,20"/>
+                        <kenney:KenneyButton Height="56"
+                                             Width="400"
+                                             Margin="0,0,0,14"
+                                             Label="Против компьютера"
+                                             IconPath="{x:Static ui:KenneyPaths.IconPlay}"
+                                             AssetPath="{x:Static ui:KenneyPaths.ButtonRectangleGreen}"
+                                             Click="VsComputerButton_Click"/>
+                        <kenney:KenneyButton Height="56"
+                                             Width="400"
+                                             Margin="0,0,0,14"
+                                             Label="1 на 1"
+                                             IconPath="{x:Static ui:KenneyPaths.IconCircle}"
+                                             AssetPath="{x:Static ui:KenneyPaths.ButtonRectangleBlue}"
+                                             Click="TwoPlayerButton_Click"/>
+                        <kenney:KenneyButton Height="48"
+                                             Width="400"
+                                             Label="В каталог"
+                                             AssetPath="{x:Static ui:KenneyPaths.ButtonRectangleGrey}"
+                                             Click="BackToCatalogButton_Click"/>
+                    </StackPanel>
+                </kenney:KenneyPanel>
+            </Viewbox>
+        </Grid>
     </Grid>
 </UserControl>

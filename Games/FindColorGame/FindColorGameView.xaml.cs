@@ -347,6 +347,7 @@ public partial class FindColorGameView : UserControl, INotifyPropertyChanged
     {
         try
         {
+            FindColorSounds.PlayTap();
             if (figure.IsTarget)
                 await HandleCorrectPickAsync(figure);
             else
@@ -361,6 +362,7 @@ public partial class FindColorGameView : UserControl, INotifyPropertyChanged
 
     private async Task HandleWrongPickAsync(ColorFigureModel figure)
     {
+        FindColorSounds.PlayWrong();
         figure.IsWrongFlash = true;
 
         try
@@ -416,9 +418,11 @@ public partial class FindColorGameView : UserControl, INotifyPropertyChanged
         _timer.Stop();
         _isRoundActive = false;
         figure.IsCorrectFlash = true;
+        FindColorSounds.PlaySuccess();
 
         try
         {
+            FindColorSounds.PlayVictory();
             await PraiseOverlay.PlayAsync();
         }
         catch (OperationCanceledException)
@@ -439,6 +443,7 @@ public partial class FindColorGameView : UserControl, INotifyPropertyChanged
         _isInputLocked = true;
         _timer.Stop();
         _isRoundActive = false;
+        FindColorSounds.PlayWrong();
 
         foreach (var figure in Figures)
             figure.IsClickable = false;

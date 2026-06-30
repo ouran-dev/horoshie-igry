@@ -1,0 +1,53 @@
+<UserControl x:Class="HoroshieIgry.Games.SortingGame.Controls.SortItemControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root"
+             Width="92"
+             Height="92"
+             Background="Transparent"
+             Cursor="Hand">
+
+    <Grid x:Name="ItemGrid"
+          RenderTransformOrigin="0.5,0.5">
+        <Grid.RenderTransform>
+            <TransformGroup>
+                <ScaleTransform x:Name="DragScale" ScaleX="1" ScaleY="1"/>
+                <TranslateTransform x:Name="DragShadow" X="0" Y="0"/>
+            </TransformGroup>
+        </Grid.RenderTransform>
+
+        <Border x:Name="ItemCard"
+                Background="#FFFDF8"
+                BorderBrush="#3D5A80"
+                BorderThickness="2.5"
+                CornerRadius="14"
+                Padding="8"
+                IsHitTestVisible="False">
+            <Border.Effect>
+                <DropShadowEffect x:Name="ItemShadow"
+                                  Color="#66000000"
+                                  BlurRadius="0"
+                                  ShadowDepth="0"
+                                  Opacity="0"/>
+            </Border.Effect>
+            <Grid>
+                <Image x:Name="ObjectImage"
+                       Stretch="Uniform"
+                       Margin="4"
+                       Visibility="Collapsed"/>
+                <Viewbox Stretch="Uniform" Margin="2">
+                    <TextBlock x:Name="EmojiText"
+                               FontFamily="Segoe UI Emoji"
+                               FontSize="64"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               TextOptions.TextFormattingMode="Display"/>
+                </Viewbox>
+            </Grid>
+        </Border>
+
+        <Canvas x:Name="StarCanvas"
+                IsHitTestVisible="False"
+                Visibility="Collapsed"/>
+    </Grid>
+</UserControl>

@@ -54,6 +54,59 @@ public static class MazeGenerator
             .OrderBy(m => m.Id)
             .ToList();
 
+    /// <summary>Сгенерировать лабиринт для уровня (детерминировано по номеру).</summary>
+    public static MazeDefinition CreateForLevel(int level)
+    {
+        level = Math.Max(1, level);
+        var random = new Random(10_000 + level * 7919);
+
+        List<string> layout;
+        string title;
+        int difficulty;
+
+        switch (level)
+        {
+            case 1:
+                layout = SimpleCorridor(9, 3);
+                title = "Первый шаг";
+                difficulty = 1;
+                break;
+            case 2:
+                layout = SimpleTurn();
+                title = "Поворот";
+                difficulty = 1;
+                break;
+            case 3:
+                layout = SimpleFork();
+                title = "Развилка";
+                difficulty = 2;
+                break;
+            case 4:
+                layout = SimpleLoop();
+                title = "Обход";
+                difficulty = 2;
+                break;
+            default:
+            {
+                var inner = Math.Clamp(5 + level / 2, 7, 13);
+                var loops = level >= 8 ? 1 + (level - 8) / 4 : 0;
+                layout = CreatePerfectMaze(inner, inner, random, loops);
+                title = $"Уровень {level}";
+                difficulty = Math.Clamp((level - 1) / 4 + 1, 1, 5);
+                break;
+            }
+        }
+
+        return MazeLayoutParser.Parse(
+            level,
+            title,
+            difficulty,
+            ExitEmojis[(level - 1) % ExitEmojis.Length],
+            layout);
+    }
+
+    public const int MaxLevel = 20;
+
     public static void ExportToDirectory(string directoryPath)
     {
         Directory.CreateDirectory(directoryPath);

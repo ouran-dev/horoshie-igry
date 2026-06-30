@@ -2,7 +2,7 @@ namespace HoroshieIgry.Core.Updates;
 
 /// <summary>
 /// Настройки канала обновлений Velopack + GitHub Releases.
-/// Перед первым релизом замените <see cref="GitHubRepoUrl"/> на ваш репозиторий.
+/// Офлайн-сборка (OFFLINE_DISTRIBUTION) отключает автообновление.
 /// </summary>
 public static class UpdateSettings
 {
@@ -12,6 +12,13 @@ public static class UpdateSettings
     /// <summary>URL репозитория GitHub, куда публикуются релизы.</summary>
     public const string GitHubRepoUrl = "https://github.com/ouran-dev/horoshie-igry";
 
+    public static bool SupportsAutoUpdate =>
+#if OFFLINE_DISTRIBUTION
+        false;
+#else
+        true;
+#endif
+
     public static bool IsConfigured =>
-        !GitHubRepoUrl.Contains("YOUR_USER", StringComparison.OrdinalIgnoreCase);
+        SupportsAutoUpdate && !GitHubRepoUrl.Contains("YOUR_USER", StringComparison.OrdinalIgnoreCase);
 }

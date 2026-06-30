@@ -1,0 +1,61 @@
+<UserControl x:Class="HoroshieIgry.Games.PaperPlaneGame.Controls.PaperPlaneVictoryOverlay"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:kenney="clr-namespace:HoroshieIgry.Controls.Kenney"
+             xmlns:ui="clr-namespace:HoroshieIgry.Core.UI"
+             Visibility="Collapsed"
+             IsHitTestVisible="True"
+             Panel.ZIndex="9">
+
+    <Grid>
+        <Canvas x:Name="ParticleCanvas" IsHitTestVisible="False"/>
+
+        <Border HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                MinWidth="380"
+                x:Name="VictoryCard"
+                Opacity="0"
+                Background="#D9FFFFFF"
+                CornerRadius="22"
+                Padding="28,22"
+                BorderBrush="#2B5C9A"
+                BorderThickness="4"
+                RenderTransformOrigin="0.5,0.5">
+            <Border.RenderTransform>
+                <ScaleTransform x:Name="VictoryScale" ScaleX="0.7" ScaleY="0.7"/>
+            </Border.RenderTransform>
+            <StackPanel HorizontalAlignment="Center">
+                <kenney:KenneyImage Width="52"
+                                    Height="52"
+                                    Margin="0,0,0,8"
+                                    HorizontalAlignment="Center"
+                                    AssetPath="{x:Static ui:KenneyPaths.Star}"/>
+                <TextBlock Text="Молодец!"
+                           Style="{StaticResource KenneyPanelTitleText}"
+                           FontSize="30"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,14"/>
+                <TextBlock x:Name="StarsResultText"
+                           Style="{StaticResource KenneyHintText}"
+                           FontSize="20"
+                           HorizontalAlignment="Center"/>
+                <TextBlock x:Name="TimeResultText"
+                           Style="{StaticResource KenneyHintText}"
+                           FontSize="20"
+                           HorizontalAlignment="Center"
+                           Margin="0,4,0,0"/>
+                <TextBlock x:Name="LevelResultText"
+                           Style="{StaticResource KenneyGameStatSubtitleText}"
+                           FontSize="18"
+                           HorizontalAlignment="Center"
+                           Margin="0,4,0,16"/>
+                <kenney:KenneyButton Label="Следующий уровень"
+                                     Width="260"
+                                     Height="56"
+                                     HorizontalAlignment="Center"
+                                     AssetPath="{x:Static ui:KenneyPaths.ButtonRectangleGreen}"
+                                     Click="NextFlightButton_Click"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

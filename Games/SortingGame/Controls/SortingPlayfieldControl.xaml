@@ -1,0 +1,33 @@
+<UserControl x:Class="HoroshieIgry.Games.SortingGame.Controls.SortingPlayfieldControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:HoroshieIgry.Games.SortingGame.Controls"
+             Background="Transparent">
+
+    <Grid x:Name="RootGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="{x:Static controls:SortingPlayfieldControl.BasketRowHeightValue}"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Canvas x:Name="ItemsCanvas"
+                Grid.Row="1"
+                Margin="8,4,8,10"
+                Background="Transparent"
+                ClipToBounds="True"/>
+
+        <UniformGrid x:Name="BasketsPanel"
+                     Grid.Row="0"
+                     Rows="1"
+                     Margin="8,4,8,8"
+                     Panel.ZIndex="2"
+                     IsHitTestVisible="False"/>
+
+        <Canvas x:Name="DragCanvas"
+                Grid.Row="1"
+                Margin="8,4,8,10"
+                Panel.ZIndex="10"
+                IsHitTestVisible="False"
+                ClipToBounds="False"/>
+    </Grid>
+</UserControl>

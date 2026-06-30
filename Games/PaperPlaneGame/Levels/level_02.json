@@ -1,0 +1,32 @@
+{
+  "id": 2,
+  "title": "Облачный коридор",
+  "length": 4200,
+  "scrollSpeed": 82,
+  "background": "clouds",
+  "showTutorial": false,
+  "planeStart": { "x": 0, "y": 210 },
+  "finish": { "x": 4200 },
+  "stars": [
+    { "x": 380, "y": 200 },
+    { "x": 720, "y": 140 },
+    { "x": 1080, "y": 270 },
+    { "x": 1500, "y": 180 },
+    { "x": 1900, "y": 250 },
+    { "x": 2350, "y": 160 },
+    { "x": 2800, "y": 220 },
+    { "x": 3300, "y": 190 }
+  ],
+  "obstacles": [
+    { "type": "cloud", "x": 520, "y": 80, "width": 130, "height": 70 },
+    { "type": "cloud", "x": 520, "y": 300, "width": 130, "height": 70 },
+    { "type": "cloud", "x": 1100, "y": 60, "width": 145, "height": 75 },
+    { "type": "cloud", "x": 1100, "y": 320, "width": 145, "height": 75 },
+    { "type": "rainCloud", "x": 1750, "y": 100, "width": 120, "height": 85 },
+    { "type": "rainCloud", "x": 1750, "y": 280, "width": 120, "height": 85 },
+    { "type": "cloud", "x": 2450, "y": 150, "width": 140, "height": 78 },
+    { "type": "cloud", "x": 2450, "y": 260, "width": 140, "height": 78 },
+    { "type": "rainCloud", "x": 3600, "y": 120, "width": 125, "height": 86 }
+  ],
+  "windGusts": []
+}

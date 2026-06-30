@@ -10,14 +10,25 @@
     <AssemblyName>HoroshieIgry</AssemblyName>
     <RootNamespace>HoroshieIgry</RootNamespace>
     <ApplicationTitle>Хорошие игры</ApplicationTitle>
-    <Version>1.0.3</Version>
-    <AssemblyVersion>1.0.3.0</AssemblyVersion>
-    <FileVersion>1.0.3.0</FileVersion>
+    <Version>1.0.4</Version>
+    <AssemblyVersion>1.0.4.0</AssemblyVersion>
+    <FileVersion>1.0.4.0</FileVersion>
+    <ApplicationIcon>Assets\Brand\AppIcon.ico</ApplicationIcon>
+    <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="SharpVectors.Wpf" Version="1.8.5" />
     <PackageReference Include="Velopack" Version="1.2.0" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(OfflineDistribution)' == 'true'">
+    <DefineConstants>$(DefineConstants);OFFLINE_DISTRIBUTION</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,6 +42,7 @@
     <Content Include="Assets\Brand\**\*" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Assets\Objects\**\*" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Assets\Mazes\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Games\PaperPlaneGame\Levels\**\*.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

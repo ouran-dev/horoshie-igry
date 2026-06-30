@@ -13,7 +13,7 @@ public sealed class MazeGameModule : IGameModule
     public string Description => "Веди персонажа пальцем по дорожке к выходу из лабиринта.";
     public string IconEmoji => "🧭";
     public bool IsAvailable => true;
-    public bool IsNew => true;
+    public bool IsNew => false;
     public BackgroundTheme BackgroundTheme => BackgroundTheme.Meadow;
 
     public UserControl CreateView(INavigationContext navigation)

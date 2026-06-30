@@ -1,0 +1,14 @@
+{
+  "id": "Colors",
+  "title": "Цвета",
+  "items": [
+    { "id": "red", "label": "Красный", "emoji": "🟥" },
+    { "id": "orange", "label": "Оранжевый", "emoji": "🟧" },
+    { "id": "yellow", "label": "Жёлтый", "emoji": "🟨" },
+    { "id": "green", "label": "Зелёный", "emoji": "🟩" },
+    { "id": "blue", "label": "Синий", "emoji": "🟦" },
+    { "id": "purple", "label": "Фиолетовый", "emoji": "🟪" },
+    { "id": "brown", "label": "Коричневый", "emoji": "🟫" },
+    { "id": "black", "label": "Чёрный", "emoji": "⬛" }
+  ]
+}

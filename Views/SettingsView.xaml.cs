@@ -28,7 +28,8 @@ public partial class SettingsView : UserControl, INotifyPropertyChanged
         private set { _updateStatus = value; OnPropertyChanged(); }
     }
 
-    public bool CanCheckForUpdates => _updates.CanCheckForUpdates && UpdateSettings.IsConfigured;
+    public bool CanCheckForUpdates =>
+        UpdateSettings.SupportsAutoUpdate && _updates.CanCheckForUpdates && UpdateSettings.IsConfigured;
 
     public bool IsCheckingUpdates
     {
@@ -65,6 +66,12 @@ public partial class SettingsView : UserControl, INotifyPropertyChanged
 
     private void RefreshUpdateHint()
     {
+        if (!UpdateSettings.SupportsAutoUpdate)
+        {
+            UpdateStatus = "Офлайн-версия: автообновление отключено. Для обновлений установите версию Setup.exe с GitHub.";
+            return;
+        }
+
         if (!UpdateSettings.IsConfigured)
         {
             UpdateStatus = "Обновления не настроены: укажите GitHub-репозиторий в UpdateSettings.";

@@ -10,7 +10,7 @@ public sealed class TicTacToeGameModule : IGameModule
     public int CatalogOrder => 40;
     public string Id => "tic-tac-toe";
     public string Title => "Крестики-нолики";
-    public string Description => "Сыграй с компьютером на поле 3×3.";
+    public string Description => "Сыграй с компьютером или вдвоём на одном экране.";
     public string IconEmoji => "⭕";
     public bool IsAvailable => true;
     public bool IsNew => false;

@@ -4,7 +4,7 @@
   "items": [
     { "id": "teddy", "label": "Мишка", "emoji": "🧸" },
     { "id": "kite", "label": "Воздушный змей", "emoji": "🪁" },
-    { "id": "blocks", "label": "Кубики", "emoji": "🧱" },
+    { "id": "yoyo", "label": "Йо-йо", "emoji": "🪀" },
     { "id": "doll", "label": "Кукла", "emoji": "🪆" },
     { "id": "balloon", "label": "Шарик", "emoji": "🎈" }
   ]

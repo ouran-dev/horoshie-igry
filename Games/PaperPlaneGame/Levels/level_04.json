@@ -1,0 +1,37 @@
+{
+  "id": 4,
+  "title": "Ветреный день",
+  "length": 5200,
+  "scrollSpeed": 95,
+  "background": "clouds",
+  "showTutorial": false,
+  "planeStart": { "x": 0, "y": 210 },
+  "finish": { "x": 5200 },
+  "stars": [
+    { "x": 450, "y": 200 },
+    { "x": 950, "y": 140 },
+    { "x": 1450, "y": 270 },
+    { "x": 1950, "y": 180 },
+    { "x": 2450, "y": 240 },
+    { "x": 2950, "y": 160 },
+    { "x": 3450, "y": 220 },
+    { "x": 3950, "y": 190 },
+    { "x": 4500, "y": 250 }
+  ],
+  "obstacles": [
+    { "type": "cloud", "x": 700, "y": 90, "width": 130, "height": 70 },
+    { "type": "cloud", "x": 700, "y": 310, "width": 130, "height": 70 },
+    { "type": "rainCloud", "x": 1400, "y": 250, "width": 125, "height": 88 },
+    { "type": "cloud", "x": 1900, "y": 150, "width": 130, "height": 72 },
+    { "type": "cloud", "x": 2500, "y": 80, "width": 140, "height": 75 },
+    { "type": "rainCloud", "x": 3000, "y": 260, "width": 125, "height": 86 },
+    { "type": "cloud", "x": 3600, "y": 300, "width": 135, "height": 72 },
+    { "type": "cloud", "x": 4200, "y": 290, "width": 130, "height": 72 }
+  ],
+  "windGusts": [
+    { "x": 1100, "y": 130, "width": 200, "height": 160, "direction": "up", "strength": 95 },
+    { "x": 2200, "y": 140, "width": 180, "height": 150, "direction": "down", "strength": 90 },
+    { "x": 3300, "y": 120, "width": 220, "height": 170, "direction": "up", "strength": 100 },
+    { "x": 4400, "y": 150, "width": 190, "height": 140, "direction": "down", "strength": 85 }
+  ]
+}

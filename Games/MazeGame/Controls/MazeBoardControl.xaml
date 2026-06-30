@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Name="Root"
              Background="Transparent"
-             SizeChanged="Root_SizeChanged"
              PreviewTouchDown="Root_PreviewTouchDown"
              PreviewTouchMove="Root_PreviewTouchMove"
              PreviewTouchUp="Root_PreviewTouchUp"

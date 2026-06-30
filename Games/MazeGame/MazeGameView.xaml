@@ -126,8 +126,9 @@
                  Stretch="Uniform"
                  StretchDirection="DownOnly"
                  HorizontalAlignment="Center"
-                 Margin="0,10,0,0">
-            <StackPanel Orientation="Horizontal" Width="548" Height="56">
+                 Margin="0,10,0,0"
+                 Panel.ZIndex="4">
+            <StackPanel Orientation="Horizontal" Width="324" Height="56">
                 <kenney:KenneyButton Height="56"
                                      Width="130"
                                      Margin="0,0,14,0"
@@ -136,20 +137,16 @@
                                      Click="HomeButton_Click"/>
                 <kenney:KenneyButton Height="56"
                                      Width="180"
-                                     Margin="0,0,14,0"
                                      Label="Заново"
                                      IconPath="{x:Static ui:KenneyPaths.IconRepeat}"
                                      AssetPath="{x:Static ui:KenneyPaths.ButtonRectangleGreen}"
                                      Click="RestartButton_Click"/>
-                <kenney:KenneyButton x:Name="NextLevelButton"
-                                     Height="56"
-                                     Width="210"
-                                     Label="Следующий уровень"
-                                     AssetPath="{x:Static ui:KenneyPaths.ButtonRectangleGreen}"
-                                     Click="NextLevelButton_Click"/>
             </StackPanel>
         </Viewbox>
 
-        <praise:PraiseBurstOverlay x:Name="PraiseOverlay" Grid.RowSpan="4" Panel.ZIndex="3"/>
+        <praise:PraiseBurstOverlay x:Name="PraiseOverlay"
+                                   Grid.RowSpan="4"
+                                   Panel.ZIndex="3"
+                                   IsHitTestVisible="False"/>
     </Grid>
 </UserControl>

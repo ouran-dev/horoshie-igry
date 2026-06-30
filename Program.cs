@@ -1,4 +1,5 @@
 using System.Windows;
+using HoroshieIgry.Core.Installation;
 using Velopack;
 
 namespace HoroshieIgry;
@@ -11,6 +12,7 @@ public static class Program
         VelopackApp.Build()
             .SetArgs(args)
             .SetAutoApplyOnStartup(true)
+            .OnFirstRun(_ => DesktopShortcutHelper.OfferCreateShortcutOnFirstRun())
             .Run();
 
         var app = new App();

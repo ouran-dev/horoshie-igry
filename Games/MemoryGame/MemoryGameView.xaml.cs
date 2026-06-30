@@ -3,6 +3,8 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 using HoroshieIgry.Core.Navigation;
 using HoroshieIgry.Core.UI;
 using HoroshieIgry.Games.MemoryGame.Helpers;
@@ -18,9 +20,10 @@ public partial class MemoryGameView : UserControl, INotifyPropertyChanged
     private const int MaxGridSize = 8;
     private const int MismatchDelayMs = 900;
     private const int MatchFadeMs = 450;
-    private const int PreviewBaseMs = 2000;
-    private const int PreviewExtraPerLevelMs = 500;
     private const int FlipCloseBufferMs = 350;
+
+    private static readonly SolidColorBrush NormalTimerBrush = CreateFrozenBrush("#1A237E");
+    private static readonly SolidColorBrush UrgentTimerBrush = CreateFrozenBrush("#E65100");
 
     private static readonly string[] AllSymbols =
     {
@@ -37,6 +40,8 @@ public partial class MemoryGameView : UserControl, INotifyPropertyChanged
     private int _moves;
     private int _matchedPairs;
     private bool _isInputLocked;
+    private bool _isPreviewPhase;
+    private int _previewSecondsRemaining;
     private CardModel? _firstSelected;
     private CardModel? _secondSelected;
     private double _cardSize = 128;
@@ -74,17 +79,15 @@ public partial class MemoryGameView : UserControl, INotifyPropertyChanged
     public double BoardWidth => GridSize * (CardSize + CardMargin * 2);
     public double BoardHeight => GridSize * (CardSize + CardMargin * 2);
 
-    private double BaseCardSize => _gridSize switch
-    {
-        3 => 148, 4 => 128, 5 => 108, 6 => 92, 7 => 80, _ => 68
-    };
-
     public double CardMargin => _gridSize <= 4 ? 10 : 7;
     public string LevelTitle => $"Поле {GridSize}×{GridSize}";
     public string MovesDisplay => _moves.ToString();
     public string PairsDisplay => $"{_matchedPairs} / {_totalPairs}";
-    public string PreviewHint => _isInputLocked ? "Запоминай карточки…" : string.Empty;
-    public Visibility PreviewHintVisibility => _isInputLocked ? Visibility.Visible : Visibility.Collapsed;
+    public string PreviewTimerDisplay => _previewSecondsRemaining.ToString();
+    public Brush PreviewTimerForeground => _previewSecondsRemaining <= 3 && _previewSecondsRemaining > 0
+        ? UrgentTimerBrush
+        : NormalTimerBrush;
+    public Visibility PreviewHintVisibility => _isPreviewPhase ? Visibility.Visible : Visibility.Collapsed;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -129,6 +132,8 @@ public partial class MemoryGameView : UserControl, INotifyPropertyChanged
         _roundCts?.Cancel();
         _roundCts?.Dispose();
         _roundCts = null;
+        _isPreviewPhase = false;
+        UpdatePreviewUi();
     }
 
     private async Task BeginRoundAsync(bool resetLevel)
@@ -145,14 +150,34 @@ public partial class MemoryGameView : UserControl, INotifyPropertyChanged
         _firstSelected = null;
         _secondSelected = null;
         _isInputLocked = true;
-        UpdatePreviewHint();
+        _isPreviewPhase = true;
 
         UpdateCounters();
         GenerateAndShuffleCards();
 
+        var previewSeconds = GetPreviewDurationSeconds();
+        _previewSecondsRemaining = previewSeconds;
+        UpdatePreviewUi();
+
         try
         {
-            await Task.Delay(GetPreviewDurationMs(), ct);
+            for (var second = previewSeconds; second > 0; second--)
+            {
+                _previewSecondsRemaining = second;
+                UpdatePreviewUi();
+
+                if (second <= 3)
+                    MemoryGameSounds.PlayTick();
+
+                await Task.Delay(1000, ct);
+            }
+
+            _isPreviewPhase = false;
+            UpdatePreviewUi();
+
+            MemoryGameSounds.PlayGo();
+            await PlayStartEffectAsync(ct);
+            if (ct.IsCancellationRequested) return;
 
             foreach (var card in Cards)
             {
@@ -170,16 +195,51 @@ public partial class MemoryGameView : UserControl, INotifyPropertyChanged
         if (ct.IsCancellationRequested) return;
 
         _isInputLocked = false;
-        UpdatePreviewHint();
     }
 
-    private int GetPreviewDurationMs()
-        => PreviewBaseMs + (_gridSize - InitialGridSize) * PreviewExtraPerLevelMs;
-
-    private void UpdatePreviewHint()
+    private static int GetPreviewDurationSeconds(int gridSize) => gridSize switch
     {
-        OnPropertyChanged(nameof(PreviewHint));
+        3 => 8,
+        4 => 10,
+        5 => 12,
+        6 => 14,
+        7 => 16,
+        _ => 18
+    };
+
+    private int GetPreviewDurationSeconds() => GetPreviewDurationSeconds(_gridSize);
+
+    private void UpdatePreviewUi()
+    {
+        OnPropertyChanged(nameof(PreviewTimerDisplay));
+        OnPropertyChanged(nameof(PreviewTimerForeground));
         OnPropertyChanged(nameof(PreviewHintVisibility));
+    }
+
+    private async Task PlayStartEffectAsync(CancellationToken ct)
+    {
+        StartOverlay.Visibility = Visibility.Visible;
+        StartCard.Opacity = 0;
+        StartBurstScale.ScaleX = 0.55;
+        StartBurstScale.ScaleY = 0.55;
+
+        var easing = new BackEase { Amplitude = 0.45, EasingMode = EasingMode.EaseOut };
+        var scaleAnimation = new DoubleAnimation(0.55, 1.08, TimeSpan.FromMilliseconds(320))
+        {
+            EasingFunction = easing
+        };
+        var fadeIn = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(180));
+
+        StartBurstScale.BeginAnimation(ScaleTransform.ScaleXProperty, scaleAnimation);
+        StartBurstScale.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimation);
+        StartCard.BeginAnimation(OpacityProperty, fadeIn);
+
+        await Task.Delay(650, ct);
+
+        var fadeOut = new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(220));
+        fadeOut.Completed += (_, _) => StartOverlay.Visibility = Visibility.Collapsed;
+        StartCard.BeginAnimation(OpacityProperty, fadeOut);
+        await Task.Delay(240, ct);
     }
 
     private static int GetPairCount(int gridSize)
@@ -228,7 +288,8 @@ public partial class MemoryGameView : UserControl, INotifyPropertyChanged
     private async void NewGameButton_Click(object sender, RoutedEventArgs e)
         => await BeginRoundAsync(resetLevel: true);
 
-    private void BackToCatalogButton_Click(object sender, RoutedEventArgs e) => _navigation.NavigateToCatalog();
+    private void BackToCatalogButton_Click(object sender, RoutedEventArgs e)
+        => _navigation.NavigateToCatalog();
 
     private async void FlipMemoryCard_CardClicked(object sender, CardModel card)
     {
@@ -236,6 +297,7 @@ public partial class MemoryGameView : UserControl, INotifyPropertyChanged
         if (!card.IsClickable || card.IsOpen || card.IsMatched) return;
 
         card.IsOpen = true;
+        MemoryGameSounds.PlayFlip();
 
         if (_firstSelected is null) { _firstSelected = card; return; }
         if (_firstSelected == card) return;
@@ -254,11 +316,16 @@ public partial class MemoryGameView : UserControl, INotifyPropertyChanged
         _secondSelected = null;
         _isInputLocked = false;
 
-        if (_matchedPairs == _totalPairs) await ShowWinMessageAsync();
+        if (_matchedPairs == _totalPairs)
+        {
+            MemoryGameSounds.PlayVictory();
+            await ShowWinMessageAsync();
+        }
     }
 
     private async Task HandleMatchAsync(CardModel first, CardModel second)
     {
+        MemoryGameSounds.PlayMatch();
         _matchedPairs++;
         UpdateCounters();
         await Task.WhenAll(FadeOutCardAsync(first), FadeOutCardAsync(second));
@@ -287,6 +354,7 @@ public partial class MemoryGameView : UserControl, INotifyPropertyChanged
 
     private async Task HandleMismatchAsync(CardModel first, CardModel second)
     {
+        MemoryGameSounds.PlayMismatch();
         await Task.Delay(MismatchDelayMs);
         first.IsOpen = false;
         second.IsOpen = false;
@@ -314,6 +382,13 @@ public partial class MemoryGameView : UserControl, INotifyPropertyChanged
 
     private void ApplyRoundBackground()
         => _navigation.SetBackgroundTheme(GameBackgroundRotator.ForRound(GameId, _gridSize));
+
+    private static SolidColorBrush CreateFrozenBrush(string hex)
+    {
+        var brush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex)!);
+        brush.Freeze();
+        return brush;
+    }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

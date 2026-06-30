@@ -3,10 +3,10 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using System.Windows.Threading;
 using HoroshieIgry.Controls.Kenney;
 using HoroshieIgry.Core.Mazes;
 using HoroshieIgry.Core.UI;
+using HoroshieIgry.Games.MazeGame.Helpers;
 
 namespace HoroshieIgry.Games.MazeGame.Controls;
 
@@ -14,37 +14,30 @@ public partial class MazeBoardControl : UserControl
 {
     private const string CharacterEmoji = "🐻";
     private const double DesignCellSize = 40;
-    private const double TouchLogicStep = 0.32;
-    private const double MouseLogicStep = 0.55;
-    private const double TouchDisplaySmoothing = 0.38;
-    private const double MouseDisplaySmoothing = 0.78;
-    private const double WobbleAmplitude = 4.0;
 
     private static readonly SolidColorBrush PathBrush = new(Color.FromRgb(0xFF, 0xF3, 0xC4));
     private static readonly SolidColorBrush WallBrush = new(Color.FromRgb(0x43, 0xA0, 0x47));
     private static readonly SolidColorBrush WallStrokeBrush = new(Color.FromRgb(0x2E, 0x7D, 0x32));
 
-    private readonly DispatcherTimer _smoothTimer;
     private readonly Grid _characterHost;
     private readonly KenneyImage _characterTile;
     private readonly TextBlock _characterEmoji;
+    private readonly Grid _exitHost;
     private readonly Border _exitGlow;
     private readonly TextBlock _exitMarker;
 
     private MazeDefinition? _maze;
-    private double _cellSize = 44;
-    private double _displayRow;
-    private double _displayCol;
+    private double _cellSize = DesignCellSize;
     private double _logicRow;
     private double _logicCol;
-    private double _fingerRow;
-    private double _fingerCol;
-    private bool _hasFingerTarget;
-    private bool _isDragging;
+    private double _grabOffsetX;
+    private double _grabOffsetY;
     private bool _isCompleted;
+    private bool _isDragging;
     private int _activeTouchId = -1;
     private bool _mouseDragging;
-    private DateTime _wobbleStart = DateTime.UtcNow;
+    private int _lastStepRow = -1;
+    private int _lastStepCol = -1;
 
     public event EventHandler? MazeCompleted;
 
@@ -54,6 +47,7 @@ public partial class MazeBoardControl : UserControl
         Stylus.SetIsPressAndHoldEnabled(this, false);
         Stylus.SetIsFlicksEnabled(this, false);
         Focusable = true;
+        Cursor = Cursors.Hand;
 
         _characterTile = new KenneyImage
         {
@@ -65,45 +59,41 @@ public partial class MazeBoardControl : UserControl
         _characterEmoji = new TextBlock
         {
             FontFamily = new FontFamily("Segoe UI Emoji"),
-            FontSize = 34,
+            FontSize = 28,
             Text = CharacterEmoji,
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center,
             IsHitTestVisible = false
         };
 
-        _characterHost = new Grid
-        {
-            IsHitTestVisible = false,
-            RenderTransformOrigin = new Point(0.5, 0.5),
-            RenderTransform = new TranslateTransform()
-        };
+        _characterHost = new Grid { IsHitTestVisible = false };
         _characterHost.Children.Add(_characterTile);
         _characterHost.Children.Add(_characterEmoji);
 
         _exitGlow = new Border
         {
-            Background = new SolidColorBrush(Color.FromArgb(0x66, 0xFF, 0xD5, 0x4F)),
-            CornerRadius = new CornerRadius(18),
+            Background = new SolidColorBrush(Color.FromArgb(0x88, 0xFF, 0xD5, 0x4F)),
+            CornerRadius = new CornerRadius(999),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
             IsHitTestVisible = false
         };
 
         _exitMarker = new TextBlock
         {
             FontFamily = new FontFamily("Segoe UI Emoji"),
-            FontSize = 40,
+            FontSize = 32,
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center,
             IsHitTestVisible = false
         };
 
-        BoardCanvas.Children.Add(_exitGlow);
-        BoardCanvas.Children.Add(_exitMarker);
-        BoardCanvas.Children.Add(_characterHost);
+        _exitHost = new Grid { IsHitTestVisible = false };
+        _exitHost.Children.Add(_exitGlow);
+        _exitHost.Children.Add(_exitMarker);
 
-        _smoothTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(16) };
-        _smoothTimer.Tick += SmoothTimer_Tick;
-        _smoothTimer.Start();
+        BoardCanvas.Children.Add(_exitHost);
+        BoardCanvas.Children.Add(_characterHost);
     }
 
     public void LoadMaze(MazeDefinition maze)
@@ -112,7 +102,9 @@ public partial class MazeBoardControl : UserControl
         _isCompleted = false;
         _isDragging = false;
         _mouseDragging = false;
-        _hasFingerTarget = false;
+        _activeTouchId = -1;
+        _lastStepRow = -1;
+        _lastStepCol = -1;
         _exitMarker.Text = maze.ExitEmoji;
 
         Width = maze.Cols * DesignCellSize;
@@ -128,44 +120,32 @@ public partial class MazeBoardControl : UserControl
         if (_maze is null) return;
 
         (_logicRow, _logicCol) = _maze.StartCenter;
-        _displayRow = _logicRow;
-        _displayCol = _logicCol;
-        _fingerRow = _logicRow;
-        _fingerCol = _logicCol;
-        _hasFingerTarget = false;
+        _lastStepRow = (int)_logicRow;
+        _lastStepCol = (int)_logicCol;
         UpdateCharacterVisual();
     }
-
-    private void Root_SizeChanged(object sender, SizeChangedEventArgs e) => RedrawBoard();
 
     private void RedrawBoard()
     {
         BoardCanvas.Children.Clear();
-        BoardCanvas.Children.Add(_exitGlow);
-        BoardCanvas.Children.Add(_exitMarker);
+        BoardCanvas.Children.Add(_exitHost);
         BoardCanvas.Children.Add(_characterHost);
 
         if (_maze is null) return;
 
-        _cellSize = DesignCellSize;
-
         var boardWidth = _maze.Cols * _cellSize;
         var boardHeight = _maze.Rows * _cellSize;
-        var offsetX = 0.0;
-        var offsetY = 0.0;
-        var gap = Math.Clamp(_cellSize * 0.1, 2, 5);
+        var gap = Math.Clamp(_cellSize * 0.1, 2, 4);
 
         BoardCanvas.Children.Insert(0, new Rectangle
         {
             Width = boardWidth,
             Height = boardHeight,
-            RadiusX = 16,
-            RadiusY = 16,
+            RadiusX = 14,
+            RadiusY = 14,
             Fill = PathBrush,
             IsHitTestVisible = false
         });
-        Canvas.SetLeft(BoardCanvas.Children[0], offsetX);
-        Canvas.SetTop(BoardCanvas.Children[0], offsetY);
 
         for (var row = 0; row < _maze.Rows; row++)
         {
@@ -173,73 +153,38 @@ public partial class MazeBoardControl : UserControl
             {
                 if (!_maze.Walls[row, col]) continue;
 
-                var rect = new Rectangle
+                var wall = new Rectangle
                 {
-                    Width = Math.Max(8, _cellSize - gap),
-                    Height = Math.Max(8, _cellSize - gap),
-                    RadiusX = 10,
-                    RadiusY = 10,
+                    Width = Math.Max(6, _cellSize - gap),
+                    Height = Math.Max(6, _cellSize - gap),
+                    RadiusX = 8,
+                    RadiusY = 8,
                     Fill = WallBrush,
                     Stroke = WallStrokeBrush,
                     StrokeThickness = 2,
                     IsHitTestVisible = false
                 };
 
-                Canvas.SetLeft(rect, offsetX + col * _cellSize + gap / 2);
-                Canvas.SetTop(rect, offsetY + row * _cellSize + gap / 2);
-                BoardCanvas.Children.Insert(BoardCanvas.Children.Count - 3, rect);
+                Canvas.SetLeft(wall, col * _cellSize + gap / 2);
+                Canvas.SetTop(wall, row * _cellSize + gap / 2);
+                BoardCanvas.Children.Insert(BoardCanvas.Children.Count - 2, wall);
             }
         }
 
-        var exitSize = _cellSize * 0.92;
-        _exitGlow.Width = exitSize;
-        _exitGlow.Height = exitSize;
-        Canvas.SetLeft(_exitGlow, offsetX + _maze.Exit.Col * _cellSize + (_cellSize - exitSize) / 2);
-        Canvas.SetTop(_exitGlow, offsetY + _maze.Exit.Row * _cellSize + (_cellSize - exitSize) / 2);
+        var tokenSize = _cellSize * 0.72;
+        _characterHost.Width = tokenSize;
+        _characterHost.Height = tokenSize;
+        _characterEmoji.FontSize = Math.Clamp(_cellSize * 0.34, 22, 36);
 
-        Canvas.SetLeft(_exitMarker, offsetX + _maze.Exit.Col * _cellSize + _cellSize * 0.22);
-        Canvas.SetTop(_exitMarker, offsetY + _maze.Exit.Row * _cellSize + _cellSize * 0.16);
+        var exitSize = _cellSize * 0.78;
+        _exitHost.Width = exitSize;
+        _exitHost.Height = exitSize;
+        _exitMarker.FontSize = Math.Clamp(_cellSize * 0.38, 24, 38);
 
-        var hostSize = _cellSize * 0.72;
-        _characterHost.Width = hostSize;
-        _characterHost.Height = hostSize;
-        _characterEmoji.FontSize = Math.Clamp(_cellSize * 0.36, 22, 40);
-
-        UpdateCharacterVisual();
-    }
-
-    private void SmoothTimer_Tick(object? sender, EventArgs e)
-    {
-        if (_maze is null) return;
-
-        if ((_isDragging || _mouseDragging) && _hasFingerTarget && !_isCompleted)
-        {
-            var step = _mouseDragging ? MouseLogicStep : TouchLogicStep;
-            var iterations = _mouseDragging ? 2 : 1;
-
-            for (var i = 0; i < iterations; i++)
-            {
-                var (nextRow, nextCol) = MazeWalker.StepTowardFinger(
-                    _maze, _logicRow, _logicCol, _fingerRow, _fingerCol, step);
-                _logicRow = nextRow;
-                _logicCol = nextCol;
-
-                if (_maze.IsAtExit(_logicRow, _logicCol))
-                {
-                    CompleteMaze();
-                    break;
-                }
-            }
-        }
-
-        var smoothing = _mouseDragging ? MouseDisplaySmoothing : TouchDisplaySmoothing;
-        _displayRow += (_logicRow - _displayRow) * smoothing;
-        _displayCol += (_logicCol - _displayCol) * smoothing;
-
-        if (Math.Abs(_logicRow - _displayRow) < 0.003)
-            _displayRow = _logicRow;
-        if (Math.Abs(_logicCol - _displayCol) < 0.003)
-            _displayCol = _logicCol;
+        var exitCenterCol = (_maze.Exit.Col + 0.5) * _cellSize;
+        var exitCenterRow = (_maze.Exit.Row + 0.5) * _cellSize;
+        Canvas.SetLeft(_exitHost, exitCenterCol - exitSize / 2);
+        Canvas.SetTop(_exitHost, exitCenterRow - exitSize / 2);
 
         UpdateCharacterVisual();
     }
@@ -248,20 +193,12 @@ public partial class MazeBoardControl : UserControl
     {
         if (_maze is null) return;
 
-        var (offsetX, offsetY) = GetBoardOffset();
+        var centerX = _logicCol * _cellSize;
+        var centerY = _logicRow * _cellSize;
 
-        var wobble = 0.0;
-        if (_isDragging || _mouseDragging)
-        {
-            var phase = (DateTime.UtcNow - _wobbleStart).TotalMilliseconds / 110.0;
-            wobble = Math.Sin(phase) * WobbleAmplitude;
-        }
-
-        Canvas.SetLeft(_characterHost, offsetX + _displayCol * _cellSize + (_cellSize - _characterHost.Width) / 2);
-        Canvas.SetTop(_characterHost, offsetY + _displayRow * _cellSize + (_cellSize - _characterHost.Height) / 2 + wobble);
-
-        if (_characterHost.RenderTransform is TranslateTransform transform)
-            transform.X = wobble * 0.15;
+        Panel.SetZIndex(_characterHost, 10);
+        Canvas.SetLeft(_characterHost, centerX - _characterHost.Width / 2);
+        Canvas.SetTop(_characterHost, centerY - _characterHost.Height / 2);
     }
 
     private void Root_PreviewTouchDown(object sender, TouchEventArgs e)
@@ -269,12 +206,11 @@ public partial class MazeBoardControl : UserControl
         if (_isCompleted || _maze is null || _isDragging) return;
 
         var pos = e.GetTouchPoint(this).Position;
-        if (!TryBeginDrag(pos, forMouse: false)) return;
+        if (!CanGrabCharacter(pos)) return;
 
         _activeTouchId = e.TouchDevice.Id;
         _isDragging = true;
-        _wobbleStart = DateTime.UtcNow;
-        ApplyFingerPosition(pos);
+        BeginDrag(pos);
         CaptureTouch(e.TouchDevice);
         e.Handled = true;
     }
@@ -284,7 +220,7 @@ public partial class MazeBoardControl : UserControl
         if (!_isDragging || e.TouchDevice.Id != _activeTouchId || _maze is null || _isCompleted)
             return;
 
-        ApplyFingerPosition(e.GetTouchPoint(this).Position);
+        ApplyPointerDrag(e.GetTouchPoint(this).Position);
         e.Handled = true;
     }
 
@@ -306,12 +242,11 @@ public partial class MazeBoardControl : UserControl
         if (e.StylusDevice is not null || _isCompleted || _maze is null || _mouseDragging) return;
 
         var pos = e.GetPosition(this);
-        if (!TryBeginDrag(pos, forMouse: true)) return;
+        if (!CanGrabCharacter(pos)) return;
 
         _mouseDragging = true;
-        _wobbleStart = DateTime.UtcNow;
         Focus();
-        ApplyFingerPosition(pos);
+        BeginDrag(pos);
         CaptureMouse();
         e.Handled = true;
     }
@@ -321,7 +256,7 @@ public partial class MazeBoardControl : UserControl
         if (!_mouseDragging || e.StylusDevice is not null || _maze is null || _isCompleted) return;
         if (e.LeftButton != MouseButtonState.Pressed) return;
 
-        ApplyFingerPosition(e.GetPosition(this));
+        ApplyPointerDrag(e.GetPosition(this));
         e.Handled = true;
     }
 
@@ -339,56 +274,51 @@ public partial class MazeBoardControl : UserControl
             EndDrag();
     }
 
-    private bool TryBeginDrag(Point position, bool forMouse)
+    private bool CanGrabCharacter(Point position)
     {
-        if (_maze is null) return false;
-
-        if (forMouse && IsNearCharacterOnScreen(position))
-            return true;
-
-        if (!TryPointToMaze(position, out var row, out var col, allowOutside: forMouse))
-            return false;
-
-        return MazeWalker.CanGrabCharacter(_logicRow, _logicCol, row, col);
+        var centerX = _logicCol * _cellSize;
+        var centerY = _logicRow * _cellSize;
+        var half = Math.Max(_characterHost.Width, _characterHost.Height) / 2 + 6;
+        var dx = position.X - centerX;
+        var dy = position.Y - centerY;
+        return dx * dx + dy * dy <= half * half;
     }
 
-    private bool IsNearCharacterOnScreen(Point position)
+    private void BeginDrag(Point position)
     {
-        var center = GetCharacterScreenCenter();
-        var grabRadius = Math.Max(_characterHost.Width, _characterHost.Height) * 0.75;
-        var dx = position.X - center.X;
-        var dy = position.Y - center.Y;
-        return dx * dx + dy * dy <= grabRadius * grabRadius;
+        MazeSounds.PlayGrab();
+        var centerX = _logicCol * _cellSize;
+        var centerY = _logicRow * _cellSize;
+        _grabOffsetX = position.X - centerX;
+        _grabOffsetY = position.Y - centerY;
+        ApplyPointerDrag(position);
     }
 
-    private Point GetCharacterScreenCenter()
+    private void ApplyPointerDrag(Point position)
     {
-        var (offsetX, offsetY) = GetBoardOffset();
-        return new Point(
-            offsetX + _displayCol * _cellSize + _cellSize / 2,
-            offsetY + _displayRow * _cellSize + _cellSize / 2);
-    }
+        if (_maze is null || _isCompleted) return;
 
-    private (double OffsetX, double OffsetY) GetBoardOffset() => (0, 0);
+        var wantCol = (position.X - _grabOffsetX) / _cellSize;
+        var wantRow = (position.Y - _grabOffsetY) / _cellSize;
+        wantCol = Math.Clamp(wantCol, 0.05, _maze.Cols - 0.05);
+        wantRow = Math.Clamp(wantRow, 0.05, _maze.Rows - 0.05);
 
-    private double GetBoardWidth() => _maze is null ? 0 : _maze.Cols * _cellSize;
+        var (row, col) = MazeFreeMovement.MoveTo(_maze, _logicRow, _logicCol, wantRow, wantCol);
+        var stepRow = (int)row;
+        var stepCol = (int)col;
+        if (stepRow != _lastStepRow || stepCol != _lastStepCol)
+        {
+            _lastStepRow = stepRow;
+            _lastStepCol = stepCol;
+            MazeSounds.PlayStep();
+        }
 
-    private double GetBoardHeight() => _maze is null ? 0 : _maze.Rows * _cellSize;
+        _logicRow = row;
+        _logicCol = col;
+        UpdateCharacterVisual();
 
-    private void ApplyFingerPosition(Point position)
-    {
-        if (_maze is null) return;
-
-        if (!TryPointToMaze(position, out var row, out var col, allowOutside: true))
-            return;
-
-        var nearest = MazeWalker.FindNearestWalkable(_maze, row, col);
-        if (!nearest.IsValid)
-            return;
-
-        _fingerRow = nearest.Row + 0.5;
-        _fingerCol = nearest.Col + 0.5;
-        _hasFingerTarget = true;
+        if (MazeFreeMovement.IsNearExit(_maze, _logicRow, _logicCol))
+            CompleteMaze();
     }
 
     private void EndDrag()
@@ -396,7 +326,6 @@ public partial class MazeBoardControl : UserControl
         _isDragging = false;
         _mouseDragging = false;
         _activeTouchId = -1;
-        _hasFingerTarget = false;
     }
 
     private void CompleteMaze()
@@ -404,33 +333,7 @@ public partial class MazeBoardControl : UserControl
         if (_isCompleted) return;
         _isCompleted = true;
         EndDrag();
+        ReleaseMouseCapture();
         MazeCompleted?.Invoke(this, EventArgs.Empty);
-    }
-
-    private bool TryPointToMaze(Point position, out double row, out double col, bool allowOutside)
-    {
-        row = 0;
-        col = 0;
-        if (_maze is null || _cellSize < 1) return false;
-
-        var (offsetX, offsetY) = GetBoardOffset();
-        var boardWidth = GetBoardWidth();
-        var boardHeight = GetBoardHeight();
-
-        var localX = position.X - offsetX;
-        var localY = position.Y - offsetY;
-
-        if (localX < 0 || localY < 0 || localX > boardWidth || localY > boardHeight)
-        {
-            if (!allowOutside) return false;
-
-            col = localX / _cellSize;
-            row = localY / _cellSize;
-            return true;
-        }
-
-        col = localX / _cellSize;
-        row = localY / _cellSize;
-        return true;
     }
 }

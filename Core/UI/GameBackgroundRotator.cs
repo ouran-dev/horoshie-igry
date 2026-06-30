@@ -14,9 +14,12 @@ public static class GameBackgroundRotator
     {
         "memory" => [BackgroundTheme.Meadow, BackgroundTheme.Forest, BackgroundTheme.Clouds, BackgroundTheme.Sea, BackgroundTheme.Meadow],
         "find-color" => [BackgroundTheme.Clouds, BackgroundTheme.Sea, BackgroundTheme.Space, BackgroundTheme.Mountains, BackgroundTheme.Desert],
-        "find-odd" => [BackgroundTheme.Forest, BackgroundTheme.Meadow, BackgroundTheme.Desert, BackgroundTheme.Clouds, BackgroundTheme.Sea],
         "tic-tac-toe" => [BackgroundTheme.Clouds, BackgroundTheme.Meadow, BackgroundTheme.Sea, BackgroundTheme.Mountains, BackgroundTheme.Clouds],
         "maze" => [BackgroundTheme.Meadow, BackgroundTheme.Forest, BackgroundTheme.Clouds, BackgroundTheme.Desert, BackgroundTheme.Sea],
+        "link-dots" => [BackgroundTheme.Clouds, BackgroundTheme.Space, BackgroundTheme.Sea, BackgroundTheme.Mountains, BackgroundTheme.Meadow],
+        "sorting" => [BackgroundTheme.Meadow, BackgroundTheme.Forest, BackgroundTheme.Clouds, BackgroundTheme.Sea, BackgroundTheme.Meadow],
+        "balloon-pop" => [BackgroundTheme.Clouds],
+        "paper-plane" => [BackgroundTheme.Clouds, BackgroundTheme.Meadow, BackgroundTheme.Sea, BackgroundTheme.Clouds, BackgroundTheme.Mountains],
         _ => [BackgroundTheme.Catalog, BackgroundTheme.Meadow, BackgroundTheme.Forest, BackgroundTheme.Sea]
     };
 }

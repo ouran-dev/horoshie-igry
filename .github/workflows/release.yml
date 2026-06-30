@@ -29,14 +29,42 @@ jobs:
           $version = $tag.TrimStart('v')
           "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
-      - name: Publish application
-        run: dotnet publish HoroshieIgry.csproj -c Release -r win-x64 --self-contained -o publish
+      - name: Ensure app icon
+        shell: pwsh
+        run: ./Tools/Ensure-AppIcon.ps1
+
+      - name: Publish online build
+        run: dotnet publish HoroshieIgry.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o publish
+
+      - name: Publish offline build
+        run: dotnet publish HoroshieIgry.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -p:OfflineDistribution=true -o publish-offline
 
       - name: Install vpk
         run: dotnet tool install -g vpk --version 1.2.0
 
       - name: Pack Velopack release
-        run: vpk pack -u HoroshieIgry -v ${{ steps.version.outputs.version }} -p publish -e HoroshieIgry.exe --packTitle "Хорошие игры" -o Releases
+        run: >
+          vpk pack -u HoroshieIgry -v ${{ steps.version.outputs.version }} -p publish -e HoroshieIgry.exe
+          --packTitle "Хорошие игры" --packAuthors "Хорошево"
+          --icon "Assets/Brand/AppIcon.ico" --splashImage "Assets/Brand/logo.png"
+          --instLocation Either --shortcuts None
+          --instWelcome "Installer/ru/welcome-online.txt"
+          --instConclusion "Installer/ru/conclusion-online.txt"
+          -o Releases
+
+      - name: Copy friendly Setup.exe name
+        shell: pwsh
+        run: Copy-Item Releases/HoroshieIgry-win-Setup.exe Releases/Setup.exe
+
+      - name: Build offline zip
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          $offlineDir = "Releases/Offline/HoroshieIgry-$version-win-x64"
+          New-Item -ItemType Directory -Force -Path $offlineDir | Out-Null
+          Copy-Item -Path publish-offline/* -Destination $offlineDir -Recurse -Force
+          Copy-Item Installer/Install-Offline.ps1, Installer/Установить-офлайн.bat -Destination $offlineDir
+          Compress-Archive -Path "$offlineDir/*" -DestinationPath "Releases/HoroshieIgry-Offline-$version-win-x64.zip" -Force
 
       - name: Upload to GitHub Releases
         shell: pwsh
@@ -50,3 +78,9 @@ jobs:
             --publish `
             --tag "${{ github.ref_name }}" `
             --releaseName "Хорошие игры ${{ steps.version.outputs.version }}"
+
+      - name: Attach offline zip to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: Releases/HoroshieIgry-Offline-${{ steps.version.outputs.version }}-win-x64.zip

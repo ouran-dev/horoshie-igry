@@ -7,6 +7,7 @@ using System.Windows.Threading;
 using HoroshieIgry.Core.Mazes;
 using HoroshieIgry.Core.Navigation;
 using HoroshieIgry.Core.UI;
+using HoroshieIgry.Games.MazeGame.Helpers;
 
 namespace HoroshieIgry.Games.MazeGame;
 
@@ -15,7 +16,6 @@ public partial class MazeGameView : UserControl, INotifyPropertyChanged
     private const string GameId = "maze";
 
     private readonly INavigationContext _navigation;
-    private readonly MazeLibrary _library;
     private readonly DispatcherTimer _timer;
     private readonly Dictionary<int, int> _bestSecondsByLevel = new();
 
@@ -24,23 +24,18 @@ public partial class MazeGameView : UserControl, INotifyPropertyChanged
     private int _elapsedSeconds;
     private bool _isLevelActive;
     private bool _isLevelCompleted;
+    private bool _isAdvancing;
+    private bool _allLevelsCompleted;
     private DateTime _levelStartedAt;
 
     public string LevelDisplay => (_levelIndex + 1).ToString();
 
-    public string LevelTitle
-    {
-        get
-        {
-            if (_levelIndex < 0 || _levelIndex >= _library.Mazes.Count)
-                return "—";
-
-            return _library.GetByIndex(_levelIndex).Title;
-        }
-    }
+    public string LevelTitle => GetCurrentMaze().Title;
 
     public string CompletedDisplay => _completedCount.ToString();
-    public string HintText => "Коснись медвежонка и веди пальцем по дорожке к выходу";
+    public string HintText => _allLevelsCompleted
+        ? "Все уровни пройдены! Нажми «Заново», чтобы начать сначала"
+        : "Нажми на медвежонка и тащи к звезде — фишка едет под пальцем";
 
     public string BestTimeDisplay
     {
@@ -60,7 +55,6 @@ public partial class MazeGameView : UserControl, INotifyPropertyChanged
     public MazeGameView(INavigationContext navigation)
     {
         _navigation = navigation;
-        _library = MazeLibraryLoader.Load();
         _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _timer.Tick += Timer_Tick;
 
@@ -79,6 +73,9 @@ public partial class MazeGameView : UserControl, INotifyPropertyChanged
         LoadLevel(resetProgress: true);
     }
 
+    private MazeDefinition GetCurrentMaze()
+        => MazeGenerator.CreateForLevel(_levelIndex + 1);
+
     private void LoadLevel(bool resetProgress)
     {
         if (resetProgress)
@@ -86,14 +83,14 @@ public partial class MazeGameView : UserControl, INotifyPropertyChanged
             _levelIndex = 0;
             _completedCount = 0;
             _bestSecondsByLevel.Clear();
+            _allLevelsCompleted = false;
         }
 
-        _levelIndex = Math.Clamp(_levelIndex, 0, _library.Mazes.Count - 1);
+        _levelIndex = Math.Clamp(_levelIndex, 0, MazeGenerator.MaxLevel - 1);
         _isLevelCompleted = false;
-        SetNextLevelEnabled(false);
+        _isAdvancing = false;
 
-        var maze = _library.GetByIndex(_levelIndex);
-        MazeBoard.LoadMaze(maze);
+        MazeBoard.LoadMaze(GetCurrentMaze());
 
         _elapsedSeconds = 0;
         _levelStartedAt = DateTime.UtcNow;
@@ -106,8 +103,11 @@ public partial class MazeGameView : UserControl, INotifyPropertyChanged
 
     private void RestartLevel()
     {
+        if (_isAdvancing) return;
+
+        _allLevelsCompleted = false;
         _isLevelCompleted = false;
-        SetNextLevelEnabled(false);
+        _isAdvancing = false;
         MazeBoard.ResetCharacter();
 
         _elapsedSeconds = 0;
@@ -119,9 +119,10 @@ public partial class MazeGameView : UserControl, INotifyPropertyChanged
 
     private async void MazeBoard_MazeCompleted(object? sender, EventArgs e)
     {
-        if (_isLevelCompleted) return;
+        if (_isLevelCompleted || _isAdvancing) return;
 
         _isLevelCompleted = true;
+        _isAdvancing = true;
         _isLevelActive = false;
         StopTimer();
 
@@ -130,9 +131,26 @@ public partial class MazeGameView : UserControl, INotifyPropertyChanged
             _bestSecondsByLevel[levelId] = _elapsedSeconds;
 
         _completedCount++;
-        SetNextLevelEnabled(_levelIndex < _library.Mazes.Count - 1);
         UpdateDisplays();
 
+        MazeSounds.PlayVictory();
+        await PlayPraiseSafeAsync();
+        await Task.Delay(800);
+
+        if (_levelIndex < MazeGenerator.MaxLevel - 1)
+        {
+            _levelIndex++;
+            LoadLevel(resetProgress: false);
+            return;
+        }
+
+        _allLevelsCompleted = true;
+        UpdateDisplays();
+        _isAdvancing = false;
+    }
+
+    private async Task PlayPraiseSafeAsync()
+    {
         try
         {
             await PraiseOverlay.PlayAsync();
@@ -143,15 +161,13 @@ public partial class MazeGameView : UserControl, INotifyPropertyChanged
         }
     }
 
-    private void NextLevelButton_Click(object sender, RoutedEventArgs e)
+    private void RestartButton_Click(object sender, RoutedEventArgs e)
     {
-        if (!_isLevelCompleted || _levelIndex >= _library.Mazes.Count - 1) return;
-
-        _levelIndex++;
-        LoadLevel(resetProgress: false);
+        if (_allLevelsCompleted)
+            LoadLevel(resetProgress: true);
+        else
+            RestartLevel();
     }
-
-    private void RestartButton_Click(object sender, RoutedEventArgs e) => RestartLevel();
 
     private void HomeButton_Click(object sender, RoutedEventArgs e)
     {
@@ -174,14 +190,6 @@ public partial class MazeGameView : UserControl, INotifyPropertyChanged
     }
 
     private void StopTimer() => _timer.Stop();
-
-    private void SetNextLevelEnabled(bool enabled)
-    {
-        NextLevelButton.IsEnabled = enabled;
-        NextLevelButton.AssetPath = enabled
-            ? KenneyPaths.ButtonRectangleGreen
-            : KenneyPaths.ButtonRectangleGrey;
-    }
 
     private void ApplyRoundBackground()
         => _navigation.SetBackgroundTheme(GameBackgroundRotator.ForRound(GameId, _levelIndex + 1));

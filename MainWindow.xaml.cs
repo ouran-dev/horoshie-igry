@@ -36,7 +36,7 @@ public partial class MainWindow : Window
     private static async Task TryCheckUpdatesOnStartupAsync()
     {
         var updates = AppUpdateService.Instance;
-        if (!updates.CanCheckForUpdates || !UpdateSettings.IsConfigured)
+        if (!updates.CanCheckForUpdates || !UpdateSettings.IsConfigured || !UpdateSettings.SupportsAutoUpdate)
             return;
 
         try

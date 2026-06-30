@@ -1,0 +1,25 @@
+{
+  "id": 1,
+  "title": "Первый перелёт",
+  "length": 3400,
+  "scrollSpeed": 66,
+  "background": "clouds",
+  "showTutorial": true,
+  "planeStart": { "x": 0, "y": 210 },
+  "finish": { "x": 3400 },
+  "stars": [
+    { "x": 420, "y": 190 },
+    { "x": 780, "y": 260 },
+    { "x": 1150, "y": 170 },
+    { "x": 1550, "y": 230 },
+    { "x": 1950, "y": 180 },
+    { "x": 2400, "y": 250 },
+    { "x": 2900, "y": 200 }
+  ],
+  "obstacles": [
+    { "type": "cloud", "x": 700, "y": 110, "width": 130, "height": 72 },
+    { "type": "cloud", "x": 1300, "y": 300, "width": 140, "height": 78 },
+    { "type": "cloud", "x": 2200, "y": 90, "width": 130, "height": 72 }
+  ],
+  "windGusts": []
+}

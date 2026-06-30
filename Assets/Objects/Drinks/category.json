@@ -1,0 +1,13 @@
+{
+  "id": "Drinks",
+  "title": "Напитки",
+  "items": [
+    { "id": "water", "label": "Вода", "emoji": "💧" },
+    { "id": "milk", "label": "Молоко", "emoji": "🥛" },
+    { "id": "juice", "label": "Сок", "emoji": "🧃" },
+    { "id": "tea", "label": "Чай", "emoji": "🍵" },
+    { "id": "coffee", "label": "Кофе", "emoji": "☕" },
+    { "id": "lemonade", "label": "Лимонад", "emoji": "🥤" },
+    { "id": "cocoa", "label": "Какао", "emoji": "🧋" }
+  ]
+}

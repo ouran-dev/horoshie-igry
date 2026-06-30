@@ -82,11 +82,35 @@
             </StackPanel>
         </Viewbox>
 
-        <TextBlock Grid.Row="1"
-                   Text="{Binding PreviewHint}"
-                   Visibility="{Binding PreviewHintVisibility}"
-                   Style="{StaticResource KenneyHintText}"
-                   Margin="0,0,0,8"/>
+        <Viewbox Grid.Row="1"
+                 Stretch="Uniform"
+                 StretchDirection="DownOnly"
+                 HorizontalAlignment="Center"
+                 Margin="0,0,0,10"
+                 Visibility="{Binding PreviewHintVisibility}">
+            <kenney:KenneyPanel Width="420"
+                                Height="72"
+                                AssetPath="{x:Static ui:KenneyPaths.PanelOutlineRectangle}"
+                                PanelPadding="16,10">
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center">
+                    <TextBlock Text="Запоминай карточки! Осталось"
+                               Style="{StaticResource KenneyHintText}"
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,0"/>
+                    <TextBlock Text="{Binding PreviewTimerDisplay}"
+                               FontSize="34"
+                               FontWeight="Bold"
+                               Foreground="{Binding PreviewTimerForeground}"
+                               VerticalAlignment="Center"
+                               Margin="0,0,6,0"/>
+                    <TextBlock Text="сек"
+                               Style="{StaticResource KenneyHintText}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </kenney:KenneyPanel>
+        </Viewbox>
 
         <Viewbox Grid.Row="2"
                  Stretch="Uniform"
@@ -135,5 +159,38 @@
         </Viewbox>
 
         <dialogs:KenneyDialogOverlay x:Name="WinDialog" Grid.RowSpan="4"/>
+
+        <Border x:Name="StartOverlay"
+                Grid.RowSpan="4"
+                Panel.ZIndex="4"
+                Visibility="Collapsed"
+                Background="#55000000"
+                IsHitTestVisible="False">
+            <Border HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Background="#EEFFFFFF"
+                    CornerRadius="20"
+                    Padding="36,22"
+                    BorderBrush="#2B5C9A"
+                    BorderThickness="3"
+                    x:Name="StartCard"
+                    Opacity="0"
+                    RenderTransformOrigin="0.5,0.5">
+                <Border.RenderTransform>
+                    <ScaleTransform x:Name="StartBurstScale" ScaleX="0.55" ScaleY="0.55"/>
+                </Border.RenderTransform>
+                <StackPanel HorizontalAlignment="Center">
+                    <kenney:KenneyImage Width="52"
+                                        Height="52"
+                                        Margin="0,0,0,8"
+                                        HorizontalAlignment="Center"
+                                        AssetPath="{x:Static ui:KenneyPaths.IconPlay}"/>
+                    <TextBlock Text="Поехали!"
+                               Style="{StaticResource KenneyDialogTitleText}"
+                               FontSize="30"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </Border>
     </Grid>
 </UserControl>

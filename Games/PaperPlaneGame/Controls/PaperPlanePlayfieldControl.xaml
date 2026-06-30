@@ -1,0 +1,76 @@
+<UserControl x:Class="HoroshieIgry.Games.PaperPlaneGame.Controls.PaperPlanePlayfieldControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="Transparent"
+             ClipToBounds="True"
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch">
+
+    <Canvas x:Name="RootCanvas" ClipToBounds="True">
+        <Rectangle x:Name="SkyRect"
+                   Fill="#B8D9F5"
+                   IsHitTestVisible="False"/>
+
+        <Canvas x:Name="ParallaxFarCanvas" IsHitTestVisible="False"/>
+        <Canvas x:Name="ParallaxNearCanvas" IsHitTestVisible="False"/>
+
+        <Rectangle x:Name="GroundRect"
+                   Fill="#552E7D32"
+                   RadiusX="8"
+                   RadiusY="8"
+                   IsHitTestVisible="False"/>
+
+        <Canvas x:Name="WorldCanvas" IsHitTestVisible="False"/>
+
+        <Polyline x:Name="TrailLine"
+                  Stroke="#AAFFFFFF"
+                  StrokeThickness="3"
+                  StrokeLineJoin="Round"
+                  IsHitTestVisible="False"/>
+
+        <Canvas x:Name="PlaneHost"
+                Canvas.Left="115"
+                Canvas.Top="210"
+                Width="56"
+                Height="56"
+                IsHitTestVisible="False"
+                RenderTransformOrigin="0.5,0.5">
+            <Canvas.RenderTransform>
+                <RotateTransform x:Name="PlaneTilt" Angle="0"/>
+            </Canvas.RenderTransform>
+
+            <TextBlock x:Name="BirdIcon"
+                       Text="🐦"
+                       FontFamily="Segoe UI Emoji"
+                       FontSize="46"
+                       Width="52"
+                       Height="52"
+                       TextAlignment="Center"
+                       RenderTransformOrigin="0.5,0.5"
+                       Canvas.Left="2"
+                       Canvas.Top="2">
+                <TextBlock.RenderTransform>
+                    <ScaleTransform ScaleX="-1" ScaleY="1"/>
+                </TextBlock.RenderTransform>
+            </TextBlock>
+        </Canvas>
+
+        <Border x:Name="FinishFlag"
+                Canvas.Left="980"
+                Canvas.Top="300"
+                Width="70"
+                Height="70"
+                Background="#CCFFFFFF"
+                CornerRadius="10"
+                BorderBrush="#2B5C9A"
+                BorderThickness="3"
+                Visibility="Collapsed"
+                IsHitTestVisible="False">
+            <TextBlock Text="🏁"
+                       FontFamily="Segoe UI Emoji"
+                       FontSize="36"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+        </Border>
+    </Canvas>
+</UserControl>

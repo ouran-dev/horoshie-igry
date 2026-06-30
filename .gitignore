@@ -1,7 +1,10 @@
 bin/
 obj/
 publish/
+publish-offline/
+publish-test/
 Releases/
+Releases-test/
 .vs/
 *.user
 *.suo
